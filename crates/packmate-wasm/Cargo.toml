@@ -1,0 +1,19 @@
+[package]
+name = "packmate-wasm"
+description = "WebAssembly bindings for packmate-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+packmate-core = { path = "../packmate-core" }
+wasm-bindgen = "0.2"
+
+# Rust's wasm32 target enables these WebAssembly features by default; wasm-opt
+# must be told about them. wasm-opt comes from the `binaryen` npm dev dependency
+# of app/ (pnpm puts it on PATH), so no GitHub download is needed.
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O", "--enable-bulk-memory", "--enable-nontrapping-float-to-int", "--enable-sign-ext", "--enable-mutable-globals", "--enable-reference-types", "--enable-multivalue"]
