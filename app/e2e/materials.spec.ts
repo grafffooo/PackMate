@@ -18,6 +18,8 @@ test("create a material, add a texture, use it on a dieline", async ({
 
   await page.goto("/#/new");
   await page.getByRole("button", { name: "Create", exact: true }).click();
+  // wait for the dieline to exist (create navigates home asynchronously) before leaving
+  await expect(page.locator(".crumb")).toBeVisible();
   await page.goto("/#/materials");
 
   await page.getByRole("button", { name: "New", exact: true }).click();

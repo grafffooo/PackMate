@@ -13,7 +13,8 @@ RUN wasm-pack build crates/dieline-wasm --release --target web --out-dir /out/wa
 
 # 2) React front end
 FROM node:22-bookworm-slim AS web
-RUN corepack enable
+# pin the same pnpm major as CI: newer majors apply a release-age policy that rejects fresh lockfile entries
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 WORKDIR /src/app
 COPY app/package.json app/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
