@@ -5,6 +5,7 @@ mod dividers;
 mod envelope;
 mod gable;
 mod mailer;
+mod multipart;
 mod pillow;
 mod shapes;
 mod sleeve;
@@ -64,6 +65,8 @@ static ALL: &[&dyn Template] = &[
     &shapes::Pyramid,
     &dividers::Dividers,
     &dividers::DividedTray,
+    &multipart::LidAndBase,
+    &multipart::DrawerBox,
 ];
 
 pub fn all() -> &'static [&'static dyn Template] {
