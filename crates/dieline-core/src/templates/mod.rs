@@ -1,14 +1,17 @@
 //! Parametric packaging templates.
 
 mod bag;
+mod dividers;
 mod envelope;
 mod gable;
 mod mailer;
 mod pillow;
+mod shapes;
+mod sleeve;
 mod tuck;
 
 use crate::dieline::Dieline;
-use crate::geom::{push_profile, rect, Contour, Edge, Prof};
+use crate::geom::{push_profile, rect, Contour, Edge, LineKind, Path, Prof};
 use crate::params::{ParamDef, Params};
 use serde::Serialize;
 
@@ -33,16 +36,34 @@ pub const CAT_MAILER: &str = "Mailers & Trays";
 pub const CAT_ENV: &str = "Envelopes";
 pub const CAT_BAG: &str = "Bags";
 pub const CAT_SPECIAL: &str = "Gift & Specialty";
+pub const CAT_SLEEVE: &str = "Sleeves & Inserts";
+pub const CAT_SHAPE: &str = "Shapes";
 
 static ALL: &[&dyn Template] = &[
-    &tuck::TuckEnd { reverse: true },
-    &tuck::TuckEnd { reverse: false },
+    &tuck::TuckEnd {
+        reverse: true,
+        lock: false,
+    },
+    &tuck::TuckEnd {
+        reverse: false,
+        lock: false,
+    },
     &mailer::Mailer { lid: true },
     &mailer::Mailer { lid: false },
     &pillow::Pillow,
     &gable::Gable,
     &envelope::Envelope,
     &bag::Bag,
+    &sleeve::Sleeve,
+    &tuck::TuckEnd {
+        reverse: true,
+        lock: true,
+    },
+    &sleeve::SnapLock,
+    &shapes::PolygonBox,
+    &shapes::Pyramid,
+    &dividers::Dividers,
+    &dividers::DividedTray,
 ];
 
 pub fn all() -> &'static [&'static dyn Template] {
@@ -191,6 +212,153 @@ pub(crate) fn glue_flap(c: &mut Contour, d: &mut Dieline, e: Edge, g: f64, paren
         e.at(l, 0.0),
         90.0,
         0,
+    );
+    d.quiet();
+}
+
+/// Width of the slit that a tongue of board thickness `t` passes through.
+pub(crate) fn slit_width(t: f64) -> f64 {
+    (t + 0.5).max(0.8)
+}
+
+/// A closed rectangular cut (a slit) in the frame of edge `e`: from `s0` to `s1` along the edge and
+/// from `v0` to `v1` across it (negative `v` is the inside of a clockwise outline).
+pub(crate) fn slit(d: &mut Dieline, e: &Edge, s0: f64, s1: f64, v0: f64, v1: f64) {
+    d.add(Path::polyline(
+        LineKind::Cut,
+        &[e.at(s0, v0), e.at(s1, v0), e.at(s1, v1), e.at(s0, v1)],
+        true,
+    ));
+}
+
+/// Locking seam flap of width `g` along edge `e`, folded `angle` degrees onto the neighbouring
+/// panel. A tongue on its free edge folds out through a slit in that panel, `g` in from the shared
+/// edge (see [`lock_slit`]). `taper` is how far the flap's corners are cut in along the edge.
+/// Returns the tongue's span `(a, b)` along the edge.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn lock_flap(
+    c: &mut Contour,
+    d: &mut Dieline,
+    e: Edge,
+    g: f64,
+    tongue: f64,
+    t: f64,
+    parent: usize,
+    angle: f64,
+    stage: u32,
+    taper: Option<f64>,
+) -> (f64, f64) {
+    let len = e.len;
+    let tl = tongue.min(len * 0.6);
+    let (a, b) = ((len - tl) / 2.0, (len + tl) / 2.0);
+    let ch = taper.unwrap_or((g * 0.5).min(len * 0.12)).min(len * 0.3);
+    let depth = (2.0 * t + 4.0).clamp(4.0, 9.0);
+    let tc = depth * 0.45;
+    push_profile(
+        c,
+        &e,
+        &[
+            Prof::P(ch, g, 0.0),
+            Prof::P(a, g, 0.0),
+            Prof::P(a + tc, g + depth, 0.0),
+            Prof::P(b - tc, g + depth, 0.0),
+            Prof::P(b, g, 0.0),
+            Prof::P(len - ch, g, 0.0),
+            Prof::P(len, 0.0, 0.0),
+        ],
+    );
+    d.crease(e.at(0.0, 0.0), e.at(len, 0.0));
+    d.crease(e.at(a, g), e.at(b, g));
+    let flap = d.fold(
+        "Lock flap",
+        vec![
+            e.at(0.0, 0.0),
+            e.at(ch, g),
+            e.at(len - ch, g),
+            e.at(len, 0.0),
+        ],
+        parent,
+        e.at(0.0, 0.0),
+        e.at(len, 0.0),
+        angle,
+        stage,
+    );
+    d.quiet();
+    d.fold(
+        "Tongue",
+        vec![
+            e.at(a, g),
+            e.at(a + tc, g + depth),
+            e.at(b - tc, g + depth),
+            e.at(b, g),
+        ],
+        flap,
+        e.at(a, g),
+        e.at(b, g),
+        -90.0,
+        stage + 1,
+    );
+    d.quiet();
+    (a, b)
+}
+
+/// The slit that receives a [`lock_flap`] tongue. `e` runs along the shared edge of the receiving
+/// panel in its own clockwise outline direction, `from_end` says whether the flap's `a..b` span was
+/// measured from the other end of that edge.
+pub(crate) fn lock_slit(
+    d: &mut Dieline,
+    e: &Edge,
+    g: f64,
+    span: (f64, f64),
+    t: f64,
+    from_end: bool,
+) {
+    let (a, b) = span;
+    let (s0, s1) = if from_end {
+        (e.len - b, e.len - a)
+    } else {
+        (a, b)
+    };
+    let w = slit_width(t);
+    slit(d, e, s0, s1, -g, -g - w);
+}
+
+/// A plain folding flap of depth `depth` with chamfered corners (like a dust flap, but square-ish).
+pub(crate) fn end_flap(
+    c: &mut Contour,
+    d: &mut Dieline,
+    e: Edge,
+    depth: f64,
+    parent: usize,
+    stage: u32,
+    name: &str,
+) {
+    let l = e.len;
+    let ins = (depth * 0.15).min(l * 0.15).max(0.0);
+    let r = (depth * 0.2).min(5.0);
+    push_profile(
+        c,
+        &e,
+        &[
+            Prof::P(ins, depth, r),
+            Prof::P(l - ins, depth, r),
+            Prof::P(l, 0.0, 0.0),
+        ],
+    );
+    d.crease(e.at(0.0, 0.0), e.at(l, 0.0));
+    d.fold(
+        name,
+        vec![
+            e.at(0.0, 0.0),
+            e.at(ins, depth),
+            e.at(l - ins, depth),
+            e.at(l, 0.0),
+        ],
+        parent,
+        e.at(0.0, 0.0),
+        e.at(l, 0.0),
+        90.0,
+        stage,
     );
     d.quiet();
 }

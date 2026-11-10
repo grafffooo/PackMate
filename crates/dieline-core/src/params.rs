@@ -52,6 +52,29 @@ pub fn length(id: &str, label: &str, group: &str, default: f64, min: f64, max: f
     }
 }
 
+pub fn number(
+    id: &str,
+    label: &str,
+    group: &str,
+    default: f64,
+    min: f64,
+    max: f64,
+    step: f64,
+) -> ParamDef {
+    ParamDef {
+        id: id.into(),
+        label: label.into(),
+        group: group.into(),
+        kind: ParamKind::Number {
+            default,
+            min,
+            max,
+            step,
+        },
+        help: None,
+    }
+}
+
 pub fn boolean(id: &str, label: &str, default: bool) -> ParamDef {
     ParamDef {
         id: id.into(),

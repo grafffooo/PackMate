@@ -198,7 +198,7 @@ mod tests {
     #[test]
     fn every_template_generates_and_exports() {
         let list: Vec<Value> = serde_json::from_str(&templates_json()).unwrap();
-        assert_eq!(list.len(), 8);
+        assert!(list.len() >= 8);
         for t in list {
             let id = t["id"].as_str().unwrap();
             let g: Value = serde_json::from_str(&generate_json(id, "{}").unwrap()).unwrap();

@@ -196,6 +196,11 @@ impl Dieline {
                 h[0] = f(h[0]);
                 h[1] = f(h[1]);
             }
+            panel.assembly = panel
+                .assembly
+                .iter()
+                .map(|a| a.shifted(off.x, off.y))
+                .collect();
         }
         for g in &mut self.glue {
             for q in g.iter_mut() {

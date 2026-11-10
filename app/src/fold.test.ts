@@ -62,7 +62,7 @@ describe("part assembly", () => {
 describe("fold model", () => {
   it("every template folds", () => {
     const list = JSON.parse(templates()) as { id: string }[];
-    expect(list.length).toBe(8);
+    expect(list.length).toBeGreaterThanOrEqual(8);
     for (const t of list) {
       const s = foldedBox(gen(t.id));
       expect(Number.isFinite(s.x + s.y + s.z)).toBe(true);

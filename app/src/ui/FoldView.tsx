@@ -281,7 +281,7 @@ export function FoldView({
     c.hinges = hinges(gen.panels);
     // boxes built on a base panel sit flat on the mat; tubes stand as laid out
     c.holder.rotation.set(
-      gen.panels[0]?.name === "Base" ? -Math.PI / 2 : 0,
+      (gen.panels[0]?.name === "Base" || gen.panels.some((p) => p.assembly?.length)) ? -Math.PI / 2 : 0,
       0,
       0,
     );
