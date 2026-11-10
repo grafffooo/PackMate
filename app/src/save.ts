@@ -1,9 +1,29 @@
-// Save exported files: native dialogs inside the Tauri app, downloads in the browser.
+// Saving exported files. Chrome and Edge open the system "Save as" dialog (so the user picks the
+// name and folder); other browsers download straight to the downloads folder.
 import type { OutFile } from "./types";
 
-export const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+type SaveFilePicker = (opts: {
+  suggestedName?: string;
+  types?: { description?: string; accept: Record<string, string[]> }[];
+}) => Promise<{
+  createWritable(): Promise<{
+    write(data: BlobPart): Promise<void>;
+    close(): Promise<void>;
+  }>;
+}>;
 
-function bytes(f: OutFile): Uint8Array {
+function picker(): SaveFilePicker | null {
+  const w = globalThis as unknown as { showSaveFilePicker?: SaveFilePicker };
+  return typeof w.showSaveFilePicker === "function"
+    ? w.showSaveFilePicker.bind(globalThis)
+    : null;
+}
+
+export function hasNativeSaveDialog(): boolean {
+  return picker() !== null;
+}
+
+export function fileBytes(f: OutFile): Uint8Array {
   if (f.base64 !== undefined) {
     const bin = atob(f.base64);
     const out = new Uint8Array(bin.length);
@@ -13,41 +33,53 @@ function bytes(f: OutFile): Uint8Array {
   return new TextEncoder().encode(f.text ?? "");
 }
 
-export async function saveFiles(files: OutFile[]): Promise<number> {
-  if (isTauri()) {
-    const { save } = await import("@tauri-apps/plugin-dialog");
-    const { writeFile } = await import("@tauri-apps/plugin-fs");
-    let n = 0;
-    for (const f of files) {
-      const ext = f.name.split(".").pop() ?? "";
-      const path = await save({ defaultPath: f.name, filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
-      if (!path) break;
-      await writeFile(path, bytes(f));
-      n++;
+export type SaveOutcome = "saved" | "downloaded" | "cancelled";
+
+export async function saveFile(f: OutFile): Promise<SaveOutcome> {
+  const data = fileBytes(f);
+  const ext = f.name.includes(".") ? "." + f.name.split(".").pop() : "";
+  const show = picker();
+  if (show) {
+    try {
+      const handle = await show({
+        suggestedName: f.name,
+        types: [
+          {
+            description: ext.slice(1).toUpperCase() || "File",
+            accept: { [f.mime]: [ext || ".bin"] },
+          },
+        ],
+      });
+      const w = await handle.createWritable();
+      await w.write(data as BlobPart);
+      await w.close();
+      return "saved";
+    } catch (e) {
+      if ((e as DOMException)?.name === "AbortError") return "cancelled";
+      // any other failure (permissions, sandbox): fall back to a normal download
     }
-    return n;
   }
-  for (const f of files) {
-    const blob = new Blob([bytes(f)], { type: f.mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = f.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
-    // browsers throttle bursts of downloads
-    if (files.length > 1) await new Promise((r) => setTimeout(r, 350));
-  }
-  return files.length;
+  const blob = new Blob([data as BlobPart], { type: f.mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = f.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  return "downloaded";
 }
 
 /** Share a file via the OS share sheet where supported (Android / iOS browsers). */
-export async function shareFiles(files: OutFile[]): Promise<boolean> {
+export async function shareFile(f: OutFile): Promise<boolean> {
   const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-  const fs = files.map((f) => new File([bytes(f)], f.name, { type: f.mime }));
-  if (!nav.share || !nav.canShare?.({ files: fs })) return false;
-  await nav.share({ files: fs, title: files[0]?.name });
-  return true;
+  const file = new File([fileBytes(f) as BlobPart], f.name, { type: f.mime });
+  if (!nav.share || !nav.canShare?.({ files: [file] })) return false;
+  try {
+    await nav.share({ files: [file], title: f.name });
+    return true;
+  } catch {
+    return false;
+  }
 }
