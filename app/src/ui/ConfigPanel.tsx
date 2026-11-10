@@ -182,7 +182,22 @@ export function ConfigPanel({
         ))}
 
         <section className="sec">
-          <h3>{t("cfg.material")}</h3>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+            }}
+          >
+            <h3>{t("cfg.material")}</h3>
+            <a
+              href="#/materials"
+              className="hint"
+              style={{ color: "var(--acc)", fontWeight: 600 }}
+            >
+              {t("cfg.manage")}
+            </a>
+          </div>
           <select
             className="sel"
             aria-label={t("cfg.material")}

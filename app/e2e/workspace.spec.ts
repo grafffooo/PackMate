@@ -4,17 +4,26 @@ import { readFile } from "node:fs/promises";
 test("first open to exported SVG", async ({ page }) => {
   const errors: string[] = [];
   // headless Chromium has no real save dialog: exercise the download fallback
-  await page.addInitScript(() => delete (window as unknown as { showSaveFilePicker?: unknown }).showSaveFilePicker);
+  await page.addInitScript(
+    () =>
+      delete (window as unknown as { showSaveFilePicker?: unknown })
+        .showSaveFilePicker,
+  );
   page.on("pageerror", (e) => errors.push(e.message));
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /made to measure/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /made to measure/ }),
+  ).toBeVisible();
   await page.getByRole("link", { name: /Create your first dieline/ }).click();
   await page.getByRole("button", { name: /Mailer Box/ }).click();
   await page.getByRole("button", { name: "Create", exact: true }).click();
 
   // the dieline appears and follows the dimensions
-  const size = page.locator(".stat").filter({ hasText: "Flat size" }).locator("b");
+  const size = page
+    .locator(".stat")
+    .filter({ hasText: "Flat size" })
+    .locator("b");
   await expect(size).toBeVisible();
   const before = await size.textContent();
   const length = page.getByLabel("Length", { exact: true });

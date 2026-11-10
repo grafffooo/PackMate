@@ -34,6 +34,7 @@ export type LibraryState = {
   selectedId: string | null;
 
   init(): Promise<void>;
+  loadTexture(id: string): Promise<TextureData | undefined>;
   /** re-read everything from the database (after a restore or a sync) */
   reload(): Promise<void>;
   createMaterial(
@@ -147,6 +148,8 @@ export function createLibrary(
           selectedId,
         });
       },
+
+      loadTexture: (id) => repo.getTexture(id),
 
       async reload() {
         await get().flush();

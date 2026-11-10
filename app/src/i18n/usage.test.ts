@@ -35,6 +35,10 @@ describe("i18n usage", () => {
       "marigold",
     ])
       expect(en[`accent.${id}`]).toBeTruthy();
+    for (const c of ["type", "size", "decode"])
+      expect(en[`materials.err.${c}`]).toBeTruthy();
+    for (const c of ["paper", "card", "board", "chip", "eflute"])
+      expect(en[`materials.preset.${c}`]).toBeTruthy();
     for (const f of ["svg", "pdf", "dxf"])
       expect(en[`export.fmt.${f}`]).toBeTruthy();
     for (const s of ["general", "appearance", "language"])

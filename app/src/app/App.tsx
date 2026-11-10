@@ -4,6 +4,7 @@ import { ToastProvider } from "./toast";
 import { ExportDialog } from "../ui/ExportDialog";
 import { NewDialog } from "../ui/NewDialog";
 import { SettingsDialog } from "../ui/SettingsDialog";
+import { MaterialsView } from "../ui/MaterialsView";
 import { Workspace } from "../ui/Workspace";
 
 export function App() {
@@ -15,7 +16,11 @@ export function App() {
   if (!ready) return <div className="boot">{t("common.loading")}</div>;
   return (
     <ToastProvider>
-      <Workspace />
+      {route.name === "materials" ? (
+        <MaterialsView selectedId={route.id} />
+      ) : (
+        <Workspace />
+      )}
       {route.name === "new" && <NewDialog folder={route.folder} />}
       {route.name === "export" && <ExportDialog />}
       {route.name === "settings" && <SettingsDialog section={route.section} />}

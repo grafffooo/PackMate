@@ -6,6 +6,7 @@ import { Pause, Play, Swap } from "./icons";
 import { DielineView, type Layers } from "./DielineView";
 import { FoldView } from "./FoldView";
 import { useI18n } from "../app/context";
+import type { FaceImages } from "./useTexture";
 
 type Main = "dieline" | "fold";
 
@@ -14,12 +15,14 @@ export function Preview({
   gen,
   unit,
   color,
+  images,
   mat,
   resetKey,
 }: {
   gen: Generated;
   unit: Unit;
   color: string;
+  images?: FaceImages;
   mat: { w: number; h: number } | null;
   resetKey: string;
 }) {
@@ -95,6 +98,7 @@ export function Preview({
           gen={gen}
           t={fold}
           color={color}
+          images={images}
           resetKey={resetKey}
           noWebglText={t("preview.noWebgl")}
         />

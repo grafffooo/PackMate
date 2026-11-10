@@ -8,6 +8,7 @@ import { ConfigPanel } from "./ConfigPanel";
 import { FirstOpen } from "./FirstOpen";
 import { Grid, Logo, Sliders } from "./icons";
 import { matOf } from "./machine";
+import { useMaterialImages } from "./useTexture";
 import { Preview } from "./Preview";
 import { ProjectTree } from "./ProjectTree";
 
@@ -26,6 +27,8 @@ export function Workspace() {
     ? templates().find((x) => x.id === project.template)
     : undefined;
   const material = project ? materialOf(project, materials) : undefined;
+
+  const images = useMaterialImages(material);
 
   const { gen, error } = useMemo<{
     gen: Generated | null;
@@ -78,6 +81,9 @@ export function Workspace() {
           </div>
         )}
         <div className="sp" />
+        <a className="btn" href="#/materials">
+          {t("materials.title")}
+        </a>
         <a
           className="iconbtn"
           href="#/settings"
@@ -121,6 +127,7 @@ export function Workspace() {
                 gen={shown}
                 unit={settings.unit}
                 color={material?.color ?? "#c49a6c"}
+                images={images}
                 mat={matOf(settings)}
                 resetKey={project.id}
               />

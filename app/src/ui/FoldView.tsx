@@ -4,6 +4,9 @@ import {
   BackSide,
   Box3,
   Color,
+  SRGBColorSpace,
+  RepeatWrapping,
+  Texture,
   DirectionalLight,
   DoubleSide,
   EdgesGeometry,
@@ -28,6 +31,7 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { foldMatrices, hinges, type Hinge } from "../fold";
 import type { Generated } from "../types";
+import type { FaceImages } from "./useTexture";
 
 type Ctx = {
   renderer: WebGLRenderer;
@@ -59,12 +63,14 @@ export function FoldView({
   gen,
   t,
   color,
+  images,
   resetKey,
   noWebglText,
 }: {
   gen: Generated;
   t: number;
   color: string;
+  images?: FaceImages;
   resetKey: string;
   noWebglText: string;
 }) {
@@ -297,14 +303,36 @@ export function FoldView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gen, resetKey]);
 
+  // colour, and the uploaded textures (repeating every 100 mm; the inside falls back to the outside image)
   useEffect(() => {
     const c = ctx.current;
     if (!c) return;
+    const made: Texture[] = [];
+    const tex = (img?: HTMLImageElement) => {
+      if (!img) return null;
+      const x = new Texture(img);
+      x.colorSpace = SRGBColorSpace;
+      x.wrapS = x.wrapT = RepeatWrapping;
+      x.repeat.set(0.01, 0.01);
+      x.anisotropy = c.renderer.capabilities.getMaxAnisotropy();
+      x.needsUpdate = true;
+      made.push(x);
+      return x;
+    };
     const base = new Color(color);
-    c.mats.out.color.copy(base);
-    c.mats.in.color.copy(base).lerp(new Color(0xffffff), 0.35);
+    const out = tex(images?.out);
+    const inn = tex(images?.in ?? images?.out);
+    c.mats.out.map = out;
+    c.mats.in.map = inn;
+    c.mats.out.color.copy(out ? new Color(0xffffff) : base);
+    c.mats.in.color.copy(
+      inn ? new Color(0xffffff) : base.clone().lerp(new Color(0xffffff), 0.35),
+    );
+    c.mats.out.needsUpdate = true;
+    c.mats.in.needsUpdate = true;
     c.render();
-  }, [color]);
+    return () => made.forEach((x) => x.dispose());
+  }, [color, images?.out, images?.in]);
 
   useEffect(() => {
     const c = ctx.current;

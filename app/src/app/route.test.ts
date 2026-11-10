@@ -11,6 +11,11 @@ describe("route", () => {
       folder: "abc",
     });
     expect(parseHash("#/export")).toEqual({ name: "export" });
+    expect(parseHash("#/materials")).toEqual({ name: "materials", id: null });
+    expect(parseHash("#/materials/a%20b")).toEqual({
+      name: "materials",
+      id: "a b",
+    });
     expect(parseHash("#/settings")).toEqual({
       name: "settings",
       section: "general",

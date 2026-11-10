@@ -11,6 +11,7 @@ export type Route =
   | { name: "home" }
   | { name: "new"; folder: string | null }
   | { name: "export" }
+  | { name: "materials"; id: string | null }
   | { name: "settings"; section: SettingsSection };
 
 /** Dialogs are hash routes, so the app works on GitHub Pages and behind any proxy without server rewrites. */
@@ -23,6 +24,11 @@ export function parseHash(hash: string): Route {
       return { name: "new", folder: q.get("folder") };
     case "export":
       return { name: "export" };
+    case "materials":
+      return {
+        name: "materials",
+        id: parts[1] ? decodeURIComponent(parts[1]) : null,
+      };
     case "settings": {
       const s = parts[1] as SettingsSection | undefined;
       return {
@@ -43,6 +49,8 @@ export function hashOf(r: Route): string {
         : "#/new";
     case "export":
       return "#/export";
+    case "materials":
+      return r.id ? `#/materials/${encodeURIComponent(r.id)}` : "#/materials";
     case "settings":
       return r.section === "general" ? "#/settings" : `#/settings/${r.section}`;
     default:
