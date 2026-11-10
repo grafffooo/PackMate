@@ -71,6 +71,9 @@ pub struct Dieline {
     /// Areas that receive glue (preview only).
     pub glue: Vec<Vec<Pt>>,
     pub warnings: Vec<String>,
+    /// The folded package stands along the layout's y axis (tubes); otherwise parts lie on the
+    /// sheet plane. Only affects how the 3D preview is oriented.
+    pub upright: bool,
 }
 
 impl Dieline {

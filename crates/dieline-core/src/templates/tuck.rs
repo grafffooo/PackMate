@@ -46,6 +46,7 @@ impl Template for TuckEnd {
         ];
         v.extend(material_params(true));
         v.push(length("tuck", "Tuck flap depth", G_OPT, 15.0, 4.0, 80.0));
+        v.push(boolean("window", "Window cut-out in front", false));
         if self.lock {
             v.push(length("flap", "Lock flap width", G_OPT, 15.0, 8.0, 50.0));
         } else {
@@ -150,6 +151,9 @@ impl Template for TuckEnd {
             glue_flap(&mut c, &mut d, e, glue, panels[0]);
         }
         d.add(c.close(LineKind::Cut));
+        if p.b("window") {
+            window(&mut d, x2, 0.0, x3, h, (l.min(h) * 0.15).max(8.0));
+        }
         d
     }
 }
@@ -196,6 +200,23 @@ mod tests {
             json!({"length": 70, "width": 40, "height": 110, "thickness": 0.5, "dims": "outer"}),
         );
         assert!(approx(d.bbox().width(), 12.0 + 2.0 * (69.5 + 39.5)));
+    }
+
+    #[test]
+    fn window_is_a_closed_hole_inside_the_front_panel() {
+        let t = TuckEnd {
+            reverse: true,
+            lock: false,
+        };
+        let plain = check(&t, json!({"length": 70, "width": 40, "height": 110}));
+        let d = check(
+            &t,
+            json!({"length": 70, "width": 40, "height": 110, "window": true}),
+        );
+        assert_eq!(d.paths.len(), plain.paths.len() + 1);
+        let hole = d.paths.last().unwrap().bbox();
+        let front = &d.panels[2].outline;
+        assert!(hole.min.x > front[0].x && hole.max.x < front[1].x);
     }
 
     #[test]

@@ -1,6 +1,7 @@
 //! Parametric packaging templates.
 
 mod bag;
+mod cylinder;
 mod dividers;
 mod envelope;
 mod gable;
@@ -67,6 +68,7 @@ static ALL: &[&dyn Template] = &[
     &dividers::DividedTray,
     &multipart::LidAndBase,
     &multipart::DrawerBox,
+    &cylinder::Cylinder,
 ];
 
 pub fn all() -> &'static [&'static dyn Template] {
@@ -217,6 +219,23 @@ pub(crate) fn glue_flap(c: &mut Contour, d: &mut Dieline, e: Edge, g: f64, paren
         0,
     );
     d.quiet();
+}
+
+/// Rounded-rectangle window cut out of a panel, `margin` in from the panel's edges.
+pub(crate) fn window(d: &mut Dieline, x0: f64, y0: f64, x1: f64, y1: f64, margin: f64) {
+    let m = margin.min((x1 - x0) * 0.3).min((y1 - y0) * 0.3);
+    let (xa, ya, xb, yb) = (x0 + m, y0 + m, x1 - m, y1 - m);
+    if xb - xa < 4.0 || yb - ya < 4.0 {
+        return;
+    }
+    let r = ((xb - xa).min(yb - ya) * 0.15).min(10.0);
+    let mid = (xa + xb) / 2.0;
+    let mut c = Contour::new(crate::geom::pt(mid, ya));
+    c.to_r(crate::geom::pt(xb, ya), r)
+        .to_r(crate::geom::pt(xb, yb), r)
+        .to_r(crate::geom::pt(xa, yb), r)
+        .to_r(crate::geom::pt(xa, ya), r);
+    d.add(c.close(LineKind::Cut));
 }
 
 /// Width of the slit that a tongue of board thickness `t` passes through.

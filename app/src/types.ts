@@ -52,6 +52,8 @@ export type Generated = {
   panels: Panel[];
   glue: Pt[][];
   warnings: string[];
+  /** the folded package stands along the layout's y axis */
+  upright?: boolean;
   params: Record<string, ParamValue>;
   cut_length: number;
   crease_length: number;

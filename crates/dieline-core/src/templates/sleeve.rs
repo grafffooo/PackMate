@@ -85,6 +85,7 @@ impl Template for SnapLock {
         ];
         v.extend(material_params(true));
         v.push(length("tuck", "Tuck flap depth", G_OPT, 15.0, 4.0, 80.0));
+        v.push(boolean("window", "Window cut-out in front", false));
         v.push(length("flap", "Lock flap width", G_OPT, 15.0, 8.0, 50.0));
         v
     }
