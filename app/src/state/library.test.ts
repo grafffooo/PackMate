@@ -37,20 +37,16 @@ describe("library", () => {
 
   it("creates projects with unique names and selects them", async () => {
     const { s } = await lib();
-    const a = await s
-      .getState()
-      .createProject({
-        template: "mailer-box",
-        name: "Mailer Box",
-        params: { length: 200 },
-      });
-    const b = await s
-      .getState()
-      .createProject({
-        template: "mailer-box",
-        name: "Mailer Box",
-        params: { length: 100 },
-      });
+    const a = await s.getState().createProject({
+      template: "mailer-box",
+      name: "Mailer Box",
+      params: { length: 200 },
+    });
+    const b = await s.getState().createProject({
+      template: "mailer-box",
+      name: "Mailer Box",
+      params: { length: 100 },
+    });
     expect(a.name).toBe("Mailer Box");
     expect(b.name).toBe("Mailer Box 2");
     expect(s.getState().selectedId).toBe(b.id);
@@ -59,14 +55,12 @@ describe("library", () => {
   it("keeps folders and moves projects out when a folder is deleted", async () => {
     const { s } = await lib();
     const f = await s.getState().createFolder("Soap shop");
-    const p = await s
-      .getState()
-      .createProject({
-        template: "pillow-box",
-        name: "Favour",
-        folderId: f.id,
-        params: {},
-      });
+    const p = await s.getState().createProject({
+      template: "pillow-box",
+      name: "Favour",
+      folderId: f.id,
+      params: {},
+    });
     expect(projectsIn(s.getState().projects, f.id)).toHaveLength(1);
     await s.getState().deleteFolder(f.id);
     expect(s.getState().folders).toHaveLength(0);
@@ -98,14 +92,12 @@ describe("library", () => {
     const repo = fresh();
     const { s } = await lib(repo);
     const f = await s.getState().createFolder("Kit");
-    const p = await s
-      .getState()
-      .createProject({
-        template: "mailer-box",
-        name: "Mailer",
-        folderId: f.id,
-        params: { length: 200 },
-      });
+    const p = await s.getState().createProject({
+      template: "mailer-box",
+      name: "Mailer",
+      folderId: f.id,
+      params: { length: 200 },
+    });
     s.getState().updateProject(p.id, { params: { length: 250 } });
     s.getState().updateProject(p.id, { params: { length: 260 } });
     await wait(40);
@@ -175,5 +167,74 @@ describe("library", () => {
   it("makes unique names", () => {
     expect(uniqueName("A", ["A", "A 2"])).toBe("A 3");
     expect(uniqueName("B", ["A"])).toBe("B");
+  });
+});
+
+describe("materials", () => {
+  it("creates, edits, duplicates and deletes with fallbacks", async () => {
+    const { s, repo } = await lib();
+    const m = await s
+      .getState()
+      .createMaterial({ name: "Kraft board 350 gsm", thickness: 0.9 });
+    expect(m.name).toBe("Kraft board 350 gsm 2");
+    s.getState().updateMaterial(m.id, { thickness: 1.2, name: "Craft" });
+    await wait(30);
+    expect(
+      (await repo.load()).materials.find((x) => x.id === m.id)?.thickness,
+    ).toBe(1.2);
+
+    const p = await s.getState().createProject({
+      template: "tray",
+      name: "T",
+      params: {},
+      materialId: m.id,
+    });
+    const copy = await s.getState().duplicateMaterial(m.id);
+    expect(copy?.thickness).toBe(1.2);
+    expect(copy?.id).not.toBe(m.id);
+
+    await s.getState().deleteMaterial(m.id);
+    expect(s.getState().projects.find((x) => x.id === p.id)?.materialId).toBe(
+      "builtin-kraft-350",
+    );
+    expect((await repo.listTombstones()).map((t) => t.key)).toContain(
+      `material:${m.id}`,
+    );
+  });
+
+  it("stores textures and prunes unused ones", async () => {
+    const { s, repo } = await lib();
+    const m = await s.getState().createMaterial({});
+    const tex = (id: string) => ({
+      id,
+      mime: "image/png" as const,
+      data: new Uint8Array([1]),
+    });
+    await s
+      .getState()
+      .setTexture(m.id, "out", tex("a"), { name: "a.png", w: 4, h: 4 });
+    await s
+      .getState()
+      .setTexture(m.id, "out", tex("b"), { name: "b.png", w: 4, h: 4 });
+    expect((await repo.allTextures()).map((t) => t.id)).toEqual(["b"]);
+    await s.getState().clearTexture(m.id, "out");
+    expect(await repo.allTextures()).toEqual([]);
+    expect(s.getState().materials.find((x) => x.id === m.id)?.textures).toEqual(
+      {},
+    );
+  });
+
+  it("records tombstones for deleted projects and folders", async () => {
+    const { s, repo } = await lib();
+    const f = await s.getState().createFolder("F");
+    const p = await s
+      .getState()
+      .createProject({ template: "tray", name: "P", params: {} });
+    await s.getState().deleteProject(p.id);
+    await s.getState().deleteFolder(f.id);
+    expect((await repo.listTombstones()).map((t) => t.key).sort()).toEqual([
+      `folder:${f.id}`,
+      `project:${p.id}`,
+    ]);
   });
 });

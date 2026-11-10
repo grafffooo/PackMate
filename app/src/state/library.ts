@@ -4,11 +4,16 @@ import { DEFAULT_MATERIAL_ID, builtinMaterials } from "../storage/seed";
 import {
   migrateSettings,
   newId,
+  tombstoneKey,
   type Folder,
   type Material,
   type Project,
+  type RecordKind,
   type Settings,
+  type TextureData,
+  type TextureRef,
 } from "../storage/model";
+import { pruneTextures } from "../storage/libraryIo";
 import type { Repo } from "../storage/repo";
 
 export type NewProject = {
@@ -29,6 +34,24 @@ export type LibraryState = {
   selectedId: string | null;
 
   init(): Promise<void>;
+  /** re-read everything from the database (after a restore or a sync) */
+  reload(): Promise<void>;
+  createMaterial(
+    input?: Partial<Pick<Material, "name" | "thickness" | "gsm" | "color">>,
+  ): Promise<Material>;
+  updateMaterial(
+    id: string,
+    patch: Partial<Pick<Material, "name" | "thickness" | "gsm" | "color">>,
+  ): void;
+  duplicateMaterial(id: string): Promise<Material | null>;
+  deleteMaterial(id: string): Promise<void>;
+  setTexture(
+    materialId: string,
+    face: "out" | "in",
+    tex: TextureData,
+    meta: Pick<TextureRef, "name" | "w" | "h">,
+  ): Promise<void>;
+  clearTexture(materialId: string, face: "out" | "in"): Promise<void>;
   createFolder(name: string): Promise<Folder>;
   renameFolder(id: string, name: string): Promise<void>;
   deleteFolder(id: string): Promise<void>;
@@ -68,9 +91,29 @@ export function createLibrary(
   const pending = new Map<string, ReturnType<typeof setTimeout>>();
 
   const store = createStore<LibraryState>((set, get) => {
-    const persistProject = async (id: string) => {
-      const p = get().projects.find((x) => x.id === id);
-      if (p) await repo.putProject(p);
+    const persist = async (key: string) => {
+      if (key.startsWith("m:")) {
+        const m = get().materials.find((x) => x.id === key.slice(2));
+        if (m) await repo.putMaterial(m);
+      } else {
+        const p = get().projects.find((x) => x.id === key);
+        if (p) await repo.putProject(p);
+      }
+    };
+    const persistProject = persist;
+    const bury = async (kind: RecordKind, id: string) => {
+      await repo.putTombstone({
+        key: tombstoneKey(kind, id),
+        kind,
+        id,
+        deletedAt: now(),
+      });
+    };
+    const putMaterial = async (m: Material) => {
+      set((s) => ({
+        materials: s.materials.map((x) => (x.id === m.id ? m : x)),
+      }));
+      await repo.putMaterial(m);
     };
 
     return {
@@ -98,11 +141,132 @@ export function createLibrary(
           ready: true,
           persistence: repo.kind,
           folders: snap.folders,
-          projects: snap.projects,
+          projects: withoutOrphans(snap.folders, snap.projects),
           materials,
           settings: snap.settings,
           selectedId,
         });
+      },
+
+      async reload() {
+        await get().flush();
+        const snap = await repo.load();
+        const sel = snap.projects.some((p) => p.id === get().selectedId)
+          ? get().selectedId
+          : (snap.projects[0]?.id ?? null);
+        set({
+          folders: snap.folders,
+          projects: withoutOrphans(snap.folders, snap.projects),
+          materials: snap.materials,
+          settings: snap.settings,
+          selectedId: sel,
+        });
+      },
+
+      async createMaterial(input = {}) {
+        const t = now();
+        const m: Material = {
+          id: newId(),
+          name: uniqueName(
+            input.name?.trim() || "New material",
+            get().materials.map((x) => x.name),
+          ),
+          thickness: input.thickness ?? 0.4,
+          gsm: input.gsm ?? null,
+          color: input.color ?? "#d8c8ad",
+          createdAt: t,
+          updatedAt: t,
+        };
+        set((s) => ({ materials: [...s.materials, m] }));
+        await repo.putMaterial(m);
+        return m;
+      },
+
+      updateMaterial(id, patch) {
+        const m = get().materials.find((x) => x.id === id);
+        if (!m) return;
+        const next: Material = { ...m, ...patch, updatedAt: now() };
+        set((s) => ({
+          materials: s.materials.map((x) => (x.id === id ? next : x)),
+        }));
+        const key = "m:" + id;
+        const old = pending.get(key);
+        if (old) clearTimeout(old);
+        pending.set(
+          key,
+          setTimeout(() => {
+            pending.delete(key);
+            void persist(key);
+          }, delay),
+        );
+      },
+
+      async duplicateMaterial(id) {
+        const m = get().materials.find((x) => x.id === id);
+        if (!m) return null;
+        await get().flush();
+        const copy = await get().createMaterial({
+          name: m.name,
+          thickness: m.thickness,
+          gsm: m.gsm,
+          color: m.color,
+        });
+        // textures are immutable, so the copy can share them until one side replaces its image
+        if (m.textures)
+          await putMaterial({ ...copy, textures: { ...m.textures } });
+        return get().materials.find((x) => x.id === copy.id) ?? copy;
+      },
+
+      async deleteMaterial(id) {
+        const timer = pending.get("m:" + id);
+        if (timer) {
+          clearTimeout(timer);
+          pending.delete("m:" + id);
+        }
+        const rest = get().materials.filter((m) => m.id !== id);
+        const fallback =
+          rest.find((m) => m.id === DEFAULT_MATERIAL_ID) ?? rest[0];
+        const moved = get()
+          .projects.filter((p) => p.materialId === id)
+          .map((p) => ({
+            ...p,
+            materialId: fallback?.id ?? DEFAULT_MATERIAL_ID,
+            updatedAt: now(),
+          }));
+        set((s) => ({
+          materials: rest,
+          projects: s.projects.map(
+            (p) => moved.find((x) => x.id === p.id) ?? p,
+          ),
+        }));
+        if (moved.length) await repo.putProjects(moved);
+        await repo.deleteMaterial(id);
+        await bury("material", id);
+        await pruneTextures(repo);
+      },
+
+      async setTexture(materialId, face, tex, meta) {
+        const m = get().materials.find((x) => x.id === materialId);
+        if (!m) return;
+        await repo.putTexture(tex);
+        await putMaterial({
+          ...m,
+          updatedAt: now(),
+          textures: {
+            ...m.textures,
+            [face]: { id: tex.id, mime: tex.mime, ...meta },
+          },
+        });
+        await pruneTextures(repo);
+      },
+
+      async clearTexture(materialId, face) {
+        const m = get().materials.find((x) => x.id === materialId);
+        if (!m?.textures?.[face]) return;
+        const textures = { ...m.textures };
+        delete textures[face];
+        await putMaterial({ ...m, updatedAt: now(), textures });
+        await pruneTextures(repo);
       },
 
       async createFolder(name) {
@@ -146,6 +310,7 @@ export function createLibrary(
         }));
         if (moved.length) await repo.putProjects(moved);
         await repo.deleteFolder(id);
+        await bury("folder", id);
       },
 
       async createProject(input) {
@@ -216,6 +381,7 @@ export function createLibrary(
           selectedId: wasSelected ? (rest[0]?.id ?? null) : get().selectedId,
         });
         await repo.deleteProject(id);
+        await bury("project", id);
         if (wasSelected)
           await get().updateSettings({ lastProjectId: get().selectedId });
       },
@@ -245,6 +411,17 @@ export function createLibrary(
 }
 
 // ---------- selectors ----------
+
+/** A project whose folder was deleted elsewhere (another device) shows up unfiled instead of vanishing. */
+export function withoutOrphans(
+  folders: Folder[],
+  projects: Project[],
+): Project[] {
+  const ids = new Set(folders.map((f) => f.id));
+  return projects.map((p) =>
+    p.folderId && !ids.has(p.folderId) ? { ...p, folderId: null } : p,
+  );
+}
 
 export function sortedFolders(folders: Folder[]): Folder[] {
   return [...folders].sort(
