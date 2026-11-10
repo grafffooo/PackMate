@@ -12,7 +12,7 @@ impl Template for Pillow {
             name: "Pillow Box",
             category: CAT_SPECIAL,
             description: "Curved-end gift box for favours, jewellery and gift cards. Folds flat, one glue seam.",
-            tags: &["gift", "favour", "wedding", "curved"],
+            tags: &["gift", "favour", "wedding", "curved", "needs glue"],
         }
     }
 

@@ -236,30 +236,51 @@ pub(crate) fn tube_panels(d: &mut Dieline, l: f64, w: f64, h: f64, names: [&str;
 #[cfg(test)]
 pub(crate) mod testutil {
     use super::*;
-    use crate::geom::{LineKind, Pt};
+    use crate::geom::{LineKind, Path, Pt};
 
-    /// Structural checks every template must pass.
-    pub fn check(t: &dyn Template, input: serde_json::Value) -> Dieline {
+    /// Structural checks every template must pass. `parts` is the number of separate pieces.
+    pub fn check_parts(t: &dyn Template, input: serde_json::Value, parts: usize) -> Dieline {
         let (_p, d) = generate(t, &input);
         let id = t.info().id;
+        let tags = t.info().tags;
+        assert!(
+            tags.contains(&"no glue") ^ tags.contains(&"needs glue"),
+            "{id}: tags must say exactly one of \"no glue\" / \"needs glue\""
+        );
         let cuts: Vec<_> = d.paths.iter().filter(|p| p.kind == LineKind::Cut).collect();
         assert!(!cuts.is_empty(), "{id}: no cut lines");
         for c in &cuts {
             assert!(c.closed, "{id}: open cut path");
         }
-        // exactly one outline encloses all other artwork
-        let bb = d.bbox();
-        let outer: Vec<_> = cuts
+        // outlines: closed cuts that no other cut encloses
+        let outer: Vec<&Path> = cuts
             .iter()
-            .filter(|c| {
-                let b = c.bbox();
-                (b.width() - bb.width()).abs() < 1e-6 && (b.height() - bb.height()).abs() < 1e-6
+            .enumerate()
+            .filter(|(i, c)| {
+                !cuts.iter().enumerate().any(|(j, o)| {
+                    j != *i
+                        && o.bbox().contains_box(&c.bbox(), 1e-6)
+                        && o.bbox().area() > c.bbox().area() + 1e-6
+                })
             })
+            .map(|(_, c)| *c)
             .collect();
-        assert_eq!(outer.len(), 1, "{id}: expected one outer outline");
-        // outline must not self-intersect
-        let poly = outer[0].flatten(0.05);
-        assert!(!self_intersects(&poly), "{id}: outline self-intersects");
+        assert_eq!(outer.len(), parts, "{id}: expected {parts} outline(s)");
+        let polys: Vec<Vec<Pt>> = outer.iter().map(|c| c.flatten(0.05)).collect();
+        for poly in &polys {
+            assert!(!self_intersects(poly), "{id}: outline self-intersects");
+        }
+        // separate parts must not overlap
+        for i in 0..outer.len() {
+            for j in i + 1..outer.len() {
+                let (a, b) = (outer[i].bbox(), outer[j].bbox());
+                let apart = a.max.x <= b.min.x + 1e-6
+                    || b.max.x <= a.min.x + 1e-6
+                    || a.max.y <= b.min.y + 1e-6
+                    || b.max.y <= a.min.y + 1e-6;
+                assert!(apart, "{id}: parts {i} and {j} overlap");
+            }
+        }
         // creases may touch, but never run along, cut lines
         let cut_lines: Vec<(Pt, Pt)> = cuts
             .iter()
@@ -282,10 +303,10 @@ pub(crate) mod testutil {
                     );
                 }
             }
-            // every crease lies inside the outline
+            // every crease lies inside an outline
             let mid = w_mid(&f);
             assert!(
-                point_in_poly(mid, &poly),
+                polys.iter().any(|poly| point_in_poly(mid, poly)),
                 "{id}: crease outside outline at {mid:?}"
             );
         }
@@ -294,9 +315,18 @@ pub(crate) mod testutil {
             if let Some(par) = p.parent {
                 assert!(par < i, "{id}: panel parent must come first");
                 assert!(p.hinge.is_some());
+                assert!(
+                    p.assembly.is_empty(),
+                    "{id}: only part roots can have an assembly"
+                );
             }
         }
         d
+    }
+
+    /// One-piece template.
+    pub fn check(t: &dyn Template, input: serde_json::Value) -> Dieline {
+        check_parts(t, input, 1)
     }
 
     fn w_mid(f: &[Pt]) -> Pt {

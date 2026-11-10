@@ -12,7 +12,7 @@ impl Template for Envelope {
             name: "Card Envelope",
             category: CAT_ENV,
             description: "Four-flap envelope sized around your card, with pointed, rounded or straight seal flap.",
-            tags: &["envelope", "card", "invitation", "wedding", "a6", "c6"],
+            tags: &["envelope", "card", "invitation", "wedding", "a6", "c6", "needs glue"],
         }
     }
 

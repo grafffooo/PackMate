@@ -23,6 +23,16 @@ export type TemplateDef = {
 
 export type LineKind = "cut" | "crease" | "perforation";
 
+/** Moves a separate part (a lid, a divider) into place; layout coordinates plus z out of the sheet. */
+export type AsmStep =
+  | {
+      t: "rot";
+      pivot: [number, number, number];
+      axis: [number, number, number];
+      angle: number;
+    }
+  | { t: "move"; d: [number, number, number] };
+
 export type Panel = {
   name: string;
   outline: Pt[];
@@ -31,6 +41,8 @@ export type Panel = {
   angle: number;
   stage: number;
   label: boolean;
+  /** root panels of extra parts only */
+  assembly?: AsmStep[];
 };
 
 export type Generated = {
@@ -48,7 +60,12 @@ export type Generated = {
 export type ParamValue = number | boolean | string;
 export type Params = Record<string, ParamValue>;
 
-export type Material = { id: string; name: string; thickness: number; note: string };
+export type Material = {
+  id: string;
+  name: string;
+  thickness: number;
+  note: string;
+};
 
 export type Machine = {
   id: string;
@@ -61,7 +78,13 @@ export type Machine = {
   tip: string;
 };
 
-export type OutFile = { name: string; mime: string; text?: string; base64?: string; bytes?: Uint8Array };
+export type OutFile = {
+  name: string;
+  mime: string;
+  text?: string;
+  base64?: string;
+  bytes?: Uint8Array;
+};
 
 export type CreaseMode = "layer" | "dashed" | "omit";
 export type Format = "svg" | "pdf" | "dxf";
@@ -78,4 +101,9 @@ export type ExportOptions = {
   tile_overlap: number;
 };
 
-export type FitInfo = { fits: boolean; rotated: boolean; per_sheet: number; tiles: number };
+export type FitInfo = {
+  fits: boolean;
+  rotated: boolean;
+  per_sheet: number;
+  tiles: number;
+};

@@ -12,7 +12,7 @@ impl Template for Gable {
             name: "Gable Box with Handle",
             category: CAT_SPECIAL,
             description: "House-shaped carry box with a die-cut handle: party favours, bakery treats, gift hampers.",
-            tags: &["gift", "handle", "bakery", "party", "house"],
+            tags: &["gift", "handle", "bakery", "party", "house", "needs glue"],
         }
     }
 

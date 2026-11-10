@@ -15,7 +15,7 @@ impl Template for TuckEnd {
                 name: "Reverse Tuck End Box",
                 category: CAT_BOX,
                 description: "The classic retail carton: tuck lids close from opposite sides. Glued side seam.",
-                tags: &["carton", "retail", "cosmetics", "rte"],
+                tags: &["carton", "retail", "cosmetics", "rte", "needs glue"],
             }
         } else {
             TemplateInfo {
@@ -23,7 +23,7 @@ impl Template for TuckEnd {
                 name: "Straight Tuck End Box",
                 category: CAT_BOX,
                 description: "Both tuck lids hinge on the back panel, so the front panel stays clean for artwork.",
-                tags: &["carton", "retail", "ste"],
+                tags: &["carton", "retail", "ste", "needs glue"],
             }
         }
     }

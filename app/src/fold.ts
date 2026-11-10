@@ -35,13 +35,21 @@ export function stageCount(panels: Panel[]): number {
 const smooth = (x: number) => x * x * (3 - 2 * x);
 
 /** Fold progress (0..1) of one panel for global progress t, folding stages one after another. */
-export function stageProgress(stage: number, stages: number, t: number): number {
+export function stageProgress(
+  stage: number,
+  stages: number,
+  t: number,
+): number {
   const local = t * stages - stage;
   return smooth(Math.min(1, Math.max(0, local)));
 }
 
 /** World matrices for all panels at global fold progress t (0 = flat, 1 = folded). */
-export function foldMatrices(panels: Panel[], t: number, hs = hinges(panels)): Matrix4[] {
+export function foldMatrices(
+  panels: Panel[],
+  t: number,
+  hs = hinges(panels),
+): Matrix4[] {
   const stages = stageCount(panels);
   const out: Matrix4[] = [];
   const tmp = new Matrix4();
@@ -50,10 +58,34 @@ export function foldMatrices(panels: Panel[], t: number, hs = hinges(panels)): M
     const h = hs[i];
     if (p.parent !== null && h) {
       m.copy(out[p.parent]);
-      const ang = ((p.angle * Math.PI) / 180) * stageProgress(p.stage, stages, t);
+      const ang =
+        ((p.angle * Math.PI) / 180) * stageProgress(p.stage, stages, t);
       m.multiply(tmp.makeTranslation(h.origin.x, h.origin.y, h.origin.z));
       m.multiply(tmp.makeRotationAxis(h.axis, ang));
       m.multiply(tmp.makeTranslation(-h.origin.x, -h.origin.y, -h.origin.z));
+    }
+    if (p.assembly?.length) {
+      // a separate part (lid, divider): carry it from where it lies flat to its place in the package
+      const k = stageProgress(p.stage, stages, t);
+      for (const st of p.assembly) {
+        const step = new Matrix4();
+        if (st.t === "move") {
+          step.makeTranslation(st.d[0] * k, -st.d[1] * k, st.d[2] * k);
+        } else {
+          const pv = new Vector3(st.pivot[0], -st.pivot[1], st.pivot[2]);
+          const axis = new Vector3(
+            st.axis[0],
+            -st.axis[1],
+            st.axis[2],
+          ).normalize();
+          step.makeTranslation(pv.x, pv.y, pv.z);
+          step.multiply(
+            tmp.makeRotationAxis(axis, ((st.angle * Math.PI) / 180) * k),
+          );
+          step.multiply(tmp.makeTranslation(-pv.x, -pv.y, -pv.z));
+        }
+        m.premultiply(step);
+      }
     }
     out.push(m);
   });

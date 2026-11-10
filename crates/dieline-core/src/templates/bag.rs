@@ -12,7 +12,7 @@ impl Template for Bag {
             name: "Gusseted Paper Bag",
             category: CAT_BAG,
             description: "Gift / shopping bag with side gussets, reinforced top hem, folded bottom and rope-handle holes.",
-            tags: &["bag", "gift bag", "shopping", "gusset"],
+            tags: &["bag", "gift bag", "shopping", "gusset", "needs glue"],
         }
     }
 
