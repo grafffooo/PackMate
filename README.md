@@ -2,65 +2,50 @@
 
 **Parametric packaging dielines for hobby cutting machines and print shops.**
 
-Choose a box, mailer, bag or envelope from the gallery and type the size you need. PackMate
-generates the unfolded dieline as clean vector cut and crease lines, shows a live 3D fold preview,
-and exports files ready for **Brother ScanNCut**, **Cricut**, **Silhouette**, cutting plotters and
-print shops.
+Pick a box, mailer, bag or envelope and type the size you need. PackMate draws the unfolded
+dieline as clean vector cut and crease lines on a cutting mat, folds it in 3D so you can check it,
+and exports files for **Brother ScanNCut**, **Cricut**, **Silhouette**, cutting plotters and print
+shops. Your dielines and folders are kept on your own device: there is no account and no server.
 
-It runs everywhere from one codebase:
+## Use it
 
 | Where | How |
 | --- | --- |
-| Any browser, desktop or mobile | Static web app (installable PWA, works offline) |
-| NAS / home server | `docker compose up -d` |
-| macOS, Windows, Linux | Tauri desktop app |
-| Android | Tauri Android app, or install the PWA from Chrome |
+| **Online** | Open the GitHub Pages site (see *Deploy* below). |
+| **macOS, Windows, Linux** | Open the site in Chrome or Edge and choose *Install PackMate* in the address bar (Safari: *File > Add to Dock*). It then runs in its own window and works offline. |
+| **Android / iPhone** | Open the site in the browser and choose *Install app* / *Add to Home Screen*. |
+| **NAS or home server** | `docker run -d -p 8080:80 ghcr.io/<owner>/packmate:latest`, or `docker compose up -d` in this repo, then open `http://<your-nas>:8080`. The image supports amd64 and arm64. |
 
-## Features
+Data lives in the browser's own storage (IndexedDB) for the address you use, so the Pages site and
+your NAS keep separate libraries.
 
-- **Template gallery** with search and category filters: Reverse and Straight Tuck End boxes,
-  Mailer Box (flip-top), Locking Tray, Pillow Box, Gable Box with handle, Card Envelope and
-  Gusseted Paper Bag.
-- **Dimension-driven editor.** Enter length, width and height as inside or outside dimensions.
-  Material thickness is compensated automatically, using a preset (cardstock, kraft, chipboard,
-  corrugated) or your own measured value.
-- **mm or inches.** Inch fields accept fractions such as `3 1/2` and suffixes such as `40mm`
-  or `2in`. Arrow keys nudge the value; hold Shift for ×10.
-- **Live 3D fold preview** with a fold slider, a play animation, and kraft or white board.
-- **2D dieline view** with pan, zoom and pinch; cut, crease, glue-area and label layers; overall
-  dimensions; and the outline of your machine's mat.
-- **Machine-aware export:**
-  - Formats:
-    - **SVG** in real millimetres, with one layer each for cut, crease and perforation.
-      CanvasWorkspace and Design Space keep these as separate layers.
-    - **PDF** with optional-content layers, for print shops and Illustrator.
-    - **DXF R12**, for plotters, laser cutters and CAD.
-  - **Machine profiles:** ScanNCut 12×12/12×24, Cricut 12×12/12×24/Joy Xtra, Silhouette,
-    A4/Letter/A3, and the SRA3/B2/B1 print sheets.
-  - **Fit check.** The app tells you whether the design fits your mat and rotates it 90° if
-    that helps.
-  - **Nesting.** Several copies are placed on one sheet.
-  - **Tiling.** Designs bigger than the mat are split into tiles with a 10 mm overlap.
-  - **Crease handling:**
-    - creases on their own layer, for a scoring wheel, stylus or pen;
-    - converted to perforated cuts, for machines without a scoring tool such as most ScanNCut
-      setups;
-    - or left out.
-  - **Cut order.** Score lines and inner holes are cut before the outline, so the piece doesn't
-    shift on the mat.
-- **Saved designs and share links.** The URL always encodes the current design, and you can keep
-  named designs on the device.
+## What it does today (milestone 1)
+
+- **Workspace:** a projects tree with folders (create, rename, move, duplicate, delete), the dieline
+  on a cutting mat with cut / crease / glue / label layers and the outline of your machine's mat,
+  and a configuration column generated from the template.
+- **3D fold view** with a fold slider, play button, a shadow that follows the box, and a swap
+  between the big view and the inset.
+- **8 generators:** Reverse and Straight Tuck End boxes, Mailer Box (flip-top), Locking Tray,
+  Pillow Box, Gable Box with handle, Card Envelope and Gusseted Paper Bag.
+- **Materials:** kraft, white, black and E-flute presets; the thickness feeds the geometry.
+- **Export** to **SVG** (real millimetres, separate cut and crease layers), **PDF** (layers) and
+  **DXF R12**. Creases can go on their own layer, become perforated cuts (for machines without a
+  scoring tool) or be left out. Chrome and Edge open a native *Save as* dialog; other browsers
+  download.
+- **Settings:** units (mm or inches), your machine, custom mat sizes, light / dark theme, six accent
+  colours, English and Slovak.
+- Installable, offline, responsive down to phone width.
+
+Coming next: a full Materials library with textures, a sync folder and backup / restore, more
+generators, desktop installers, and splitting large dielines across sheets.
 
 ### Tips for your machine
 
-- **Brother ScanNCut** (CanvasWorkspace):
-  1. Import the SVG.
-  2. If you have no embossing or scoring tool, export with *Perforated cut* creases.
-  3. Otherwise, set the crease layer to *Draw* with a pen as a fold guide.
-- **Cricut** (Design Space):
-  1. Upload the SVG.
-  2. Select the blue crease layer and set its operation to **Score**.
-  3. Select both layers and **Attach** them.
+- **Brother ScanNCut** (CanvasWorkspace): import the SVG. Without an embossing or scoring tool,
+  export with *Perforated* creases; otherwise set the crease layer to *Draw* with a pen as a guide.
+- **Cricut** (Design Space): upload the SVG, select the crease layer, set it to **Score**, then
+  select both layers and **Attach** them.
 - **Silhouette Studio:** use *Cut by line color*: red is cut, blue is score or perforate.
 
 ## Architecture
@@ -69,8 +54,8 @@ It runs everywhere from one codebase:
 crates/
   dieline-core/   Rust: geometry, 8 parametric templates, fold model, layout/tiling, SVG/PDF/DXF writers
   dieline-wasm/   wasm-bindgen facade (JSON in / JSON out)
-app/              React + TypeScript + Vite UI, three.js fold preview, PWA
-  src-tauri/      Tauri 2 shell for desktop and Android
+app/              React + TypeScript + Vite UI, three.js fold view, PWA (hash routes, relative URLs)
+  src-tauri/      Tauri 2 shell (dormant: the desktop story is the installable PWA for now)
 docker/           Static nginx image for NAS / servers
 ```
 
@@ -114,7 +99,8 @@ pnpm dev          # builds the WASM engine, then starts Vite on http://localhost
 
 ```bash
 cargo test --workspace              # geometry, templates, exporters
-cd app && pnpm build && pnpm test   # type-check, production build, fold-model tests
+cd app && pnpm build && pnpm test   # type-check, production build, unit tests
+cd app && pnpm e2e                  # Playwright end-to-end test (needs a Chromium)
 ```
 
 Write every template's default dieline to SVG files:
@@ -140,8 +126,8 @@ pnpm tauri android init
 pnpm tauri android build --apk
 ```
 
-Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux
-installers into a draft GitHub release.
+`.github/workflows/release.yml` can build the installers into a draft release. It runs only when you
+start it by hand.
 
 ### Docker / NAS
 
@@ -150,7 +136,14 @@ docker compose up -d       # → http://<host>:8080
 ```
 
 The image is a static nginx site of about 25 MB. It needs no database and no outbound network
-access.
+access. CI publishes it to `ghcr.io/<owner>/packmate` for amd64 and arm64 (make the package public
+in the repository's package settings if you want to pull it without logging in).
+
+### GitHub Pages
+
+Set **Settings > Pages > Source** to *GitHub Actions*. Every push to `main` then builds and deploys
+the site to `https://<owner>.github.io/<repo>/`. The build uses relative URLs, so the sub-path just
+works.
 
 ## Adding a template
 
@@ -163,7 +156,9 @@ access.
 2. Register it in `templates/mod.rs`.
 3. Add a test that calls `testutil::check`.
 
-The gallery, form, 3D preview and exporters pick it up automatically.
+The generator list, form, 3D view and exporters pick it up automatically. Add its English name and
+description to `app/src/i18n/en.ts` (`tpl.<id>.name` / `.desc`) and the Slovak text to `sk.ts`; without them the
+app falls back to the engine's English text.
 
 ## Roadmap
 

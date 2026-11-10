@@ -1,9 +1,8 @@
 name: Release desktop apps
 
-# Push a tag like v0.1.0 to build installers for macOS, Windows and Linux as a draft release.
+# Dormant: the desktop story for now is installing the PWA. Run this by hand to try the Tauri installers
+# for macOS, Windows and Linux (it makes a draft release for the tag you pass).
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
 
 jobs:

@@ -42,3 +42,7 @@ jobs:
         working-directory: app
       - run: pnpm test
         working-directory: app
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: app
+      - run: pnpm e2e
+        working-directory: app

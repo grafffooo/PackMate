@@ -9,7 +9,8 @@
     "build": "pnpm wasm && pnpm build:web",
     "build:web": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource/outfit": "^5.3.0",
@@ -30,7 +31,6 @@
     "fake-indexeddb": "^6.2.8",
     "typescript": "~5.6.3",
     "vite": "^6.4.6",
-    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^3.2.7"
   },
   "license": "GPL-3.0-only"
