@@ -1,0 +1,6 @@
+target
+app/node_modules
+app/dist
+app/wasm
+app/src-tauri
+.git

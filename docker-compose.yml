@@ -1,0 +1,10 @@
+# docker compose up -d   →   http://<your-nas>:8080
+services:
+  packmate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: packmate:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped
