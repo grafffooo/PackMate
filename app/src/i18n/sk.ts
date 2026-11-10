@@ -284,4 +284,54 @@ export const sk: Record<MessageKey, string> = {
   "materials.empty.s1t": "Ohyby sa zatvárajú bez vydúvania",
   "materials.empty.s2": "Farba a textúra",
   "materials.empty.s2t": "Realistický 3D náhľad",
+
+  "settings.sync": "Synchronizácia a záloha",
+  "settings.sync.lead":
+    "Chráňte svoje projekty a materiály a prenášajte ich medzi zariadeniami.",
+  "sync.folder": "Synchronizovaný priečinok",
+  "sync.folder.hint": "Použite vlastnú cloudovú službu",
+  "sync.none": "Nie je vybraný žiadny priečinok",
+  "sync.choose": "Vybrať priečinok…",
+  "sync.change": "Zmeniť…",
+  "sync.ok": "Aktuálne · posledná synchronizácia {time}",
+  "sync.syncing": "Synchronizuje sa…",
+  "sync.now": "Synchronizovať",
+  "sync.stop": "Zastaviť synchronizáciu",
+  "sync.permission":
+    "PackMate potrebuje vaše povolenie na opätovné otvorenie „{name}“.",
+  "sync.reconnect": "Povoliť prístup",
+  "sync.error":
+    "Priečinok sa nedá otvoriť. Skontrolujte, či beží vaša cloudová aplikácia.",
+  "sync.retry": "Skúsiť znova",
+  "sync.failed": "Synchronizáciu sa nepodarilo spustiť: {msg}",
+  "sync.note":
+    "Vyberte priečinok, ktorý už synchronizuje iCloud Drive, Google Drive, OneDrive, Dropbox alebo iná služba. PackMate v ňom uchováva vaše projekty a materiály a vaša služba ich prenesie do ďalších zariadení.",
+  "sync.unsupported":
+    "Synchronizácia priečinka vyžaduje prehliadač Chromium, napríklad Chrome alebo Edge na počítači. V tomto prehliadači na prenos dát použite zálohu a obnovenie nižšie.",
+  "backup.title": "Záloha",
+  "backup.hint": "Jeden archívny súbor",
+  "backup.button": "Zálohovať všetko…",
+  "backup.done":
+    "Uložené: {name}. Presuňte ho do druhého zariadenia a tam ho obnovte.",
+  "backup.note":
+    "Uloží všetky projekty, priečinky a materiály vrátane nahraných textúr do jedného archívu na jednoduchý prenos do iného zariadenia.",
+  "backup.failed": "Zálohovanie zlyhalo: {msg}",
+  "restore.title": "Obnovenie",
+  "restore.hint": "Zo zálohového archívu",
+  "restore.choose": "Vybrať zálohový súbor…",
+  "restore.summary":
+    "{projects} strihov, {folders} priečinkov, {materials} materiálov",
+  "restore.skipped": "{n} poškodených položiek vynechaných",
+  "restore.add": "Pridať do mojej knižnice",
+  "restore.add.hint":
+    "Zachová to, čo máte. Ak sa položka nachádza v oboch, vyhrá novšia.",
+  "restore.replace": "Nahradiť všetko",
+  "restore.replace.hint": "Vaša aktuálna knižnica sa nahradí zálohou.",
+  "restore.button": "Obnoviť",
+  "restore.confirm.title": "Nahradiť celú knižnicu?",
+  "restore.confirm.text":
+    "Všetko v tomto zariadení sa nahradí zálohou. Túto akciu nemožno vrátiť, preto ak si nie ste istí, najprv vytvorte zálohu.",
+  "restore.replace.button": "Nahradiť všetko",
+  "restore.done": "Obnovené. Vaša knižnica je aktuálna.",
+  "restore.failed": "Obnovenie zlyhalo: {msg}",
 };

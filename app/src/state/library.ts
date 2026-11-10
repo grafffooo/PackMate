@@ -25,6 +25,8 @@ export type NewProject = {
 };
 
 export type LibraryState = {
+  /** the database; exposed for backup and sync, which work on whole libraries */
+  repo: Repo;
   ready: boolean;
   persistence: "indexeddb" | "memory" | null;
   folders: Folder[];
@@ -118,6 +120,7 @@ export function createLibrary(
     };
 
     return {
+      repo,
       ready: false,
       persistence: null,
       folders: [],

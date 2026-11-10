@@ -19,7 +19,7 @@ shops. Your dielines and folders are kept on your own device: there is no accoun
 Data lives in the browser's own storage (IndexedDB) for the address you use, so the Pages site and
 your NAS keep separate libraries.
 
-## What it does today (milestone 1)
+## What it does today
 
 - **Workspace:** a projects tree with folders (create, rename, move, duplicate, delete), the dieline
   on a cutting mat with cut / crease / glue / label layers and the outline of your machine's mat,
@@ -28,7 +28,16 @@ your NAS keep separate libraries.
   between the big view and the inset.
 - **8 generators:** Reverse and Straight Tuck End boxes, Mailer Box (flip-top), Locking Tray,
   Pillow Box, Gable Box with handle, Card Envelope and Gusseted Paper Bag.
-- **Materials:** kraft, white, black and E-flute presets; the thickness feeds the geometry.
+- **Materials library:** kraft, white, black and E-flute presets plus your own. Each has a name,
+  thickness (which feeds the fold geometry), weight, colour and an optional JPG/PNG texture for the
+  outside and inside face, shown on the 3D box. Images are downscaled to 2048 px.
+- **Backup and restore:** one `.packmate.zip` with all dielines, folders, materials and textures
+  (readable with any zip tool). Restore either adds to your library (the newer item wins) or
+  replaces it.
+- **Sync folder:** pick a folder that iCloud Drive, Google Drive, OneDrive, Dropbox or similar already
+  syncs; PackMate keeps one small file per dieline / material in it and syncs both ways (newest edit
+  wins, deletions travel too). Needs a Chromium browser (Chrome, Edge) on a computer; elsewhere use
+  backup and restore. The browser asks you to re-allow access to the folder after a restart.
 - **Export** to **SVG** (real millimetres, separate cut and crease layers), **PDF** (layers) and
   **DXF R12**. Creases can go on their own layer, become perforated cuts (for machines without a
   scoring tool) or be left out. Chrome and Edge open a native *Save as* dialog; other browsers
@@ -37,8 +46,8 @@ your NAS keep separate libraries.
   colours, English and Slovak.
 - Installable, offline, responsive down to phone width.
 
-Coming next: a full Materials library with textures, a sync folder and backup / restore, more
-generators, desktop installers, and splitting large dielines across sheets.
+Coming next: sheet sizes and stock per material, more generators, desktop installers, and splitting
+large dielines across sheets.
 
 ### Tips for your machine
 

@@ -9,26 +9,8 @@ import { format } from "../units";
 import { Dialog, LengthInput, Seg } from "./kit";
 import { machineOf } from "./machine";
 import { Close } from "./icons";
-
-function Row({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="row">
-      <div className="lab">
-        <b>{label}</b>
-        {hint && <span>{hint}</span>}
-      </div>
-      <div>{children}</div>
-    </div>
-  );
-}
+import { Row } from "./settingsRow";
+import { SyncSettings } from "./SyncSettings";
 
 function General() {
   const { t } = useI18n();
@@ -338,6 +320,7 @@ export function SettingsDialog({ section }: { section: SettingsSection }) {
         <div className="st-pane">
           {section === "general" && <General />}
           {section === "appearance" && <Appearance />}
+          {section === "sync" && <SyncSettings />}
           {section === "language" && <Language />}
         </div>
       </div>

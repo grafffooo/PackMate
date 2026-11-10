@@ -283,6 +283,54 @@ export const en = {
   "materials.empty.s1t": "Folds close without bulging",
   "materials.empty.s2": "Colour & texture",
   "materials.empty.s2t": "A realistic 3D preview",
+
+  "settings.sync": "Sync and Backup",
+  "settings.sync.lead":
+    "Keep your projects and materials safe, and move them between devices.",
+  "sync.folder": "Sync folder",
+  "sync.folder.hint": "Use your own cloud service",
+  "sync.none": "No folder selected",
+  "sync.choose": "Choose folder…",
+  "sync.change": "Change…",
+  "sync.ok": "Up to date · last synced {time}",
+  "sync.syncing": "Syncing…",
+  "sync.now": "Sync now",
+  "sync.stop": "Stop syncing",
+  "sync.permission": "PackMate needs your permission to open “{name}” again.",
+  "sync.reconnect": "Allow access",
+  "sync.error": "Can’t reach the folder. Check that your cloud app is running.",
+  "sync.retry": "Retry",
+  "sync.failed": "Couldn’t start syncing: {msg}",
+  "sync.note":
+    "Pick a folder that iCloud Drive, Google Drive, OneDrive, Dropbox or another service already syncs. PackMate keeps your projects and materials inside it, and your service carries them to your other devices.",
+  "sync.unsupported":
+    "Folder sync needs a Chromium browser such as Chrome or Edge on a computer. In this browser, use Backup and Restore below to move your data.",
+  "backup.title": "Backup",
+  "backup.hint": "One archive file",
+  "backup.button": "Back up everything…",
+  "backup.done":
+    "Saved {name}. Move it to your other device and restore it there.",
+  "backup.note":
+    "Saves all projects, folders and materials, including uploaded textures, into a single archive for easy transfer to another device.",
+  "backup.failed": "Backup failed: {msg}",
+  "restore.title": "Restore",
+  "restore.hint": "From a backup archive",
+  "restore.choose": "Choose backup file…",
+  "restore.summary":
+    "{projects} dielines, {folders} folders, {materials} materials",
+  "restore.skipped": "{n} damaged items skipped",
+  "restore.add": "Add to my library",
+  "restore.add.hint":
+    "Keeps what you have. When both have the same item, the newer one wins.",
+  "restore.replace": "Replace everything",
+  "restore.replace.hint": "Your current library is replaced by the backup.",
+  "restore.button": "Restore",
+  "restore.confirm.title": "Replace your whole library?",
+  "restore.confirm.text":
+    "Everything on this device is replaced by the backup. This can’t be undone, so make a backup first if you’re unsure.",
+  "restore.replace.button": "Replace everything",
+  "restore.done": "Restored. Your library is up to date.",
+  "restore.failed": "Restore failed: {msg}",
 } as const;
 
 export type MessageKey = keyof typeof en;

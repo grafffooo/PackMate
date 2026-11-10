@@ -89,3 +89,31 @@ export function useI18n(): { lang: Lang; t: TFn; tp: TPluralFn } {
   }, [lang]);
   return { lang, ...fns };
 }
+
+// ---------- sync ----------
+import type { SyncState } from "../sync/manager";
+
+const SyncCtx = createContext<StoreApi<SyncState> | null>(null);
+
+export function SyncProvider({
+  store,
+  children,
+}: {
+  store: StoreApi<SyncState>;
+  children: ReactNode;
+}) {
+  return <SyncCtx.Provider value={store}>{children}</SyncCtx.Provider>;
+}
+
+export function useSync<T>(selector: (s: SyncState) => T): T {
+  const s = useContext(SyncCtx);
+  if (!s) throw new Error("SyncProvider missing");
+  return useStore(s, selector);
+}
+
+/** Sync actions without subscribing to status changes. */
+export function useSyncActions(): SyncState {
+  const s = useContext(SyncCtx);
+  if (!s) throw new Error("SyncProvider missing");
+  return s.getState();
+}

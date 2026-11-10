@@ -31,6 +31,9 @@ export interface Repo {
   putMaterial(m: Material): Promise<void>;
   deleteMaterial(id: string): Promise<void>;
   putSettings(s: Settings): Promise<void>;
+  getKv<T = unknown>(key: string): Promise<T | undefined>;
+  putKv(key: string, value: unknown): Promise<void>;
+  deleteKv(key: string): Promise<void>;
   putTexture(t: TextureData): Promise<void>;
   getTexture(id: string): Promise<TextureData | undefined>;
   allTextures(): Promise<TextureData[]>;
@@ -122,6 +125,15 @@ export class IdbRepo implements Repo {
   }
   async markSeeded() {
     await (await this.db).put("kv", true, "seeded");
+  }
+  async getKv<T>(key: string) {
+    return (await (await this.db).get("kv", "x:" + key)) as T | undefined;
+  }
+  async putKv(key: string, value: unknown) {
+    await (await this.db).put("kv", value, "x:" + key);
+  }
+  async deleteKv(key: string) {
+    await (await this.db).delete("kv", "x:" + key);
   }
   async putTexture(t: TextureData) {
     await (await this.db).put("textures", t);
@@ -220,6 +232,16 @@ export class MemoryRepo implements Repo {
   }
   async markSeeded() {
     this.seeded = true;
+  }
+  private kv = new Map<string, unknown>();
+  async getKv<T>(key: string) {
+    return this.kv.get(key) as T | undefined;
+  }
+  async putKv(key: string, value: unknown) {
+    this.kv.set(key, value);
+  }
+  async deleteKv(key: string) {
+    this.kv.delete(key);
   }
   async putTexture(t: TextureData) {
     this.textures.set(t.id, t);

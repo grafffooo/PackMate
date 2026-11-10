@@ -6,7 +6,8 @@ import "./styles/app.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
-import { LibraryProvider } from "./app/context";
+import { LibraryProvider, SyncProvider } from "./app/context";
+import { createSyncManager } from "./sync/manager";
 import { loadCore } from "./core";
 import { createLibrary } from "./state/library";
 import { openRepo } from "./storage/repo";
@@ -17,6 +18,8 @@ async function boot() {
     const [repo] = await Promise.all([openRepo(), loadCore()]);
     const store = createLibrary(repo);
     await store.getState().init();
+    const sync = createSyncManager(repo, store);
+    void sync.getState().start();
     window.addEventListener("pagehide", () => void store.getState().flush());
     document.addEventListener(
       "visibilitychange",
@@ -26,7 +29,9 @@ async function boot() {
     root.render(
       <StrictMode>
         <LibraryProvider store={store}>
-          <App />
+          <SyncProvider store={sync}>
+            <App />
+          </SyncProvider>
         </LibraryProvider>
       </StrictMode>,
     );

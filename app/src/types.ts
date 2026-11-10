@@ -61,7 +61,7 @@ export type Machine = {
   tip: string;
 };
 
-export type OutFile = { name: string; mime: string; text?: string; base64?: string };
+export type OutFile = { name: string; mime: string; text?: string; base64?: string; bytes?: Uint8Array };
 
 export type CreaseMode = "layer" | "dashed" | "omit";
 export type Format = "svg" | "pdf" | "dxf";

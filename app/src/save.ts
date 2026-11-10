@@ -24,6 +24,7 @@ export function hasNativeSaveDialog(): boolean {
 }
 
 export function fileBytes(f: OutFile): Uint8Array {
+  if (f.bytes) return f.bytes;
   if (f.base64 !== undefined) {
     const bin = atob(f.base64);
     const out = new Uint8Array(bin.length);

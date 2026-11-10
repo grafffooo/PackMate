@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 
-export type SettingsSection = "general" | "appearance" | "language";
+export type SettingsSection = "general" | "appearance" | "sync" | "language";
 export const SETTINGS_SECTIONS: SettingsSection[] = [
   "general",
   "appearance",
+  "sync",
   "language",
 ];
 
