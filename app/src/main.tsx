@@ -42,7 +42,11 @@ async function boot() {
       </div>,
     );
   }
-  if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  if (
+    "serviceWorker" in navigator &&
+    import.meta.env.PROD &&
+    !("__TAURI_INTERNALS__" in globalThis)
+  ) {
     navigator.serviceWorker.register("./sw.js").catch(() => undefined);
   }
 }

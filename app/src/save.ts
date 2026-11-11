@@ -19,8 +19,13 @@ function picker(): SaveFilePicker | null {
     : null;
 }
 
+/** True inside the desktop app (Tauri), where files are saved through the native dialog. */
+export function isDesktopApp(): boolean {
+  return "__TAURI_INTERNALS__" in globalThis;
+}
+
 export function hasNativeSaveDialog(): boolean {
-  return picker() !== null;
+  return isDesktopApp() || picker() !== null;
 }
 
 export function fileBytes(f: OutFile): Uint8Array {
@@ -39,6 +44,20 @@ export type SaveOutcome = "saved" | "downloaded" | "cancelled";
 export async function saveFile(f: OutFile): Promise<SaveOutcome> {
   const data = fileBytes(f);
   const ext = f.name.includes(".") ? "." + f.name.split(".").pop() : "";
+  if (isDesktopApp()) {
+    const { save } = await import("@tauri-apps/plugin-dialog");
+    const { writeFile } = await import("@tauri-apps/plugin-fs");
+    const kind = ext.slice(1);
+    const path = await save({
+      defaultPath: f.name,
+      filters: kind
+        ? [{ name: kind.toUpperCase(), extensions: [kind] }]
+        : undefined,
+    });
+    if (!path) return "cancelled";
+    await writeFile(path, data);
+    return "saved";
+  }
   const show = picker();
   if (show) {
     try {

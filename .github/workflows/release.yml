@@ -1,14 +1,61 @@
-name: Release desktop apps
+name: Release
 
-# Dormant: the desktop story for now is installing the PWA. Run this by hand to try the Tauri installers
-# for macOS, Windows and Linux (it makes a draft release for the tag you pass).
+# Push a tag like v0.1.0 to build the desktop installers (macOS, Windows, Linux), the web zip and
+# checksums, and publish a GitHub release. The same tag makes docker.yml publish the image tags.
+# Start it by hand with a throw-away tag name (and draft left on) for a dry run: the release stays
+# a draft that you can inspect and delete.
 on:
+  push:
+    tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag name for a dry run, e.g. v0.1.0-dryrun"
+        required: true
+      draft:
+        description: "Keep the release as a draft"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+  KEEP_DRAFT: ${{ github.event_name == 'workflow_dispatch' && inputs.draft }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.release.outputs.id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: The tag matches the app version
+        if: github.event_name == 'push'
+        run: |
+          v="${TAG#v}"
+          for f in app/src-tauri/tauri.conf.json app/package.json; do
+            grep -q "\"version\": \"$v\"" "$f" || { echo "::error::$f is not version $v"; exit 1; }
+          done
+          grep -q "^version = \"$v\"" app/src-tauri/Cargo.toml || { echo "::error::src-tauri/Cargo.toml is not version $v"; exit 1; }
+      - name: Release notes from CHANGELOG.md
+        run: |
+          base="${TAG%%-*}"
+          awk -v h="## $base " 'index($0,h)==1 {on=1; next} /^## / {on=0} on' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then echo "No changelog section for $base" > notes.md; fi
+          cat notes.md
+      - name: Create the draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "PackMate $TAG" --notes-file notes.md
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq ".[] | select(.tag_name==\"$TAG\") | .id" | head -1)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
   desktop:
-    permissions:
-      contents: write
+    needs: prepare
     strategy:
       fail-fast: false
       matrix:
@@ -26,7 +73,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin,wasm32-unknown-unknown' || 'wasm32-unknown-unknown' }}
@@ -49,7 +96,54 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: app
-          tagName: ${{ github.ref_name }}
-          releaseName: PackMate ${{ github.ref_name }}
-          releaseDraft: true
+          releaseId: ${{ needs.prepare.outputs.release_id }}
           args: ${{ matrix.args }}
+
+  web:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install --locked wasm-pack@0.15.1
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: app
+      - run: pnpm build
+        working-directory: app
+      - name: Zip the static site and attach it
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          name="packmate-web-$TAG.zip"
+          (cd app/dist && zip -qr "../../$name" .)
+          gh release upload "$TAG" "$name" --clobber
+
+  publish:
+    needs: [prepare, desktop, web]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checksums, then publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir assets && cd assets
+          gh release download "$TAG" --pattern '*' --clobber
+          rm -f SHA256SUMS.txt
+          sha256sum * > ../SHA256SUMS.txt
+          cd .. && cat SHA256SUMS.txt
+          gh release upload "$TAG" SHA256SUMS.txt --clobber
+          if [ "$KEEP_DRAFT" != "true" ]; then
+            gh release edit "$TAG" --draft=false --latest
+          fi
