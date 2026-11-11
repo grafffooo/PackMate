@@ -6,7 +6,7 @@ import { sortedFolders } from "../state/library";
 import { DEFAULT_MATERIAL_ID } from "../storage/seed";
 import { Dialog } from "./kit";
 import { Check } from "./icons";
-import { catName, tplDesc, tplName } from "./text";
+import { catName, glueTag, tplDesc, tplName } from "./text";
 import { ThumbSvg } from "./Thumb";
 
 export function NewDialog({ folder }: { folder: string | null }) {
@@ -116,7 +116,9 @@ export function NewDialog({ folder }: { folder: string | null }) {
                   </span>
                   <span className="gen-b">
                     <b>{tplName(t, x)}</b>
-                    <span>{catName(t, x.category)}</span>
+                    <span>
+                      {catName(t, x.category)} · {glueTag(t, x)}
+                    </span>
                   </span>
                 </button>
               ))}

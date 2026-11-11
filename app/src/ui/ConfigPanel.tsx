@@ -9,7 +9,14 @@ import type {
 import { format, type Unit } from "../units";
 import type { Material, Project } from "../storage/model";
 import { Check, LengthInput, Seg } from "./kit";
-import { groupName, optionLabel, paramHelp, paramLabel, tplName } from "./text";
+import {
+  glueTag,
+  groupName,
+  optionLabel,
+  paramHelp,
+  paramLabel,
+  tplName,
+} from "./text";
 import { Download } from "./icons";
 import { useI18n } from "../app/context";
 import { go } from "../app/route";
@@ -150,7 +157,9 @@ export function ConfigPanel({
     <aside className="card cfg" aria-label={t("cfg.label")}>
       <div className="cfg-scroll">
         <h3>{project.name}</h3>
-        <div className="type">{tplName(t, tpl)}</div>
+        <div className="type">
+          {tplName(t, tpl)} · {glueTag(t, tpl)}
+        </div>
 
         {groups.map((g) => (
           <Fragment key={g}>

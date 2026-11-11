@@ -26,8 +26,16 @@ your NAS keep separate libraries.
   and a configuration column generated from the template.
 - **3D fold view** with a fold slider, play button, a shadow that follows the box, and a swap
   between the big view and the inset.
-- **8 generators:** Reverse and Straight Tuck End boxes, Mailer Box (flip-top), Locking Tray,
-  Pillow Box, Gable Box with handle, Card Envelope and Gusseted Paper Bag.
+- **18 generators**, most of them glue-free (the New dialog tags each one "No glue" or "Needs glue"):
+  - *Boxes:* Reverse and Straight Tuck End (glued seam), Tuck-Lock Box (locking seam), Snap-Lock
+    Bottom Box (interlocking 1-2-3 bottom), Lid and Base Box (two parts).
+  - *Mailers & Trays:* Mailer Box, Locking Tray, Drawer Box (matchbox: drawer plus sleeve).
+  - *Sleeves & Inserts:* Sleeve, Slotted Dividers (loose parts that lock into a grid), Compartment Tray.
+  - *Shapes:* Hexagon / Polygon Box (3 to 8 sides), Pyramid (3 to 8 sides), Cylinder Box.
+  - *Gift & Specialty, Envelopes, Bags:* Pillow Box, Gable Box with handle, Card Envelope, Gusseted Paper Bag.
+  - Tuck-end and snap-lock boxes have an optional window cut-out. Multi-part generators lay their
+    parts side by side and the 3D view assembles them (lid onto base, drawer into sleeve, dividers
+    standing up).
 - **Materials library:** kraft, white, black and E-flute presets plus your own. Each has a name,
   thickness (which feeds the fold geometry), weight, colour and an optional JPG/PNG texture for the
   outside and inside face, shown on the 3D box. Images are downscaled to 2048 px.
@@ -168,6 +176,12 @@ works.
 The generator list, form, 3D view and exporters pick it up automatically. Add its English name and
 description to `app/src/i18n/en.ts` (`tpl.<id>.name` / `.desc`) and the Slovak text to `sk.ts`; without them the
 app falls back to the engine's English text.
+
+## Credits
+
+The divider and slot-grid approach was inspired by [Boxes.py](https://github.com/florianfesti/boxes)
+by Florian Festi (GPL-3.0+). Boxes.py is a Python generator for rigid, finger-jointed laser-cut
+parts; PackMate's generators are written from scratch in Rust for folded paper and card.
 
 ## Roadmap
 

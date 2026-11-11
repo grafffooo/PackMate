@@ -331,6 +331,72 @@ export const en = {
   "restore.replace.button": "Replace everything",
   "restore.done": "Restored. Your library is up to date.",
   "restore.failed": "Restore failed: {msg}",
+
+  "cat.Sleeves & Inserts": "Sleeves & Inserts",
+  "cat.Shapes": "Shapes",
+  "tag.noGlue": "No glue",
+  "tag.needsGlue": "Needs glue",
+  "tpl.sleeve.name": "Sleeve",
+  "tpl.sleeve.desc":
+    "Open-ended wrap that slides over a tray, drawer or product. The seam locks with a tongue and slit, no glue.",
+  "tpl.tuck-lock-box.name": "Tuck-Lock Box",
+  "tpl.tuck-lock-box.desc":
+    "Reverse tuck end carton whose side seam locks with a tongue and slit. No glue needed.",
+  "tpl.snap-lock-box.name": "Snap-Lock Bottom Box",
+  "tpl.snap-lock-box.desc":
+    "Folding carton with an interlocking bottom, a locking side seam and a tuck lid. Assembles without glue.",
+  "tpl.polygon-box.name": "Hexagon / Polygon Box",
+  "tpl.polygon-box.desc":
+    "Gift box on a regular polygon: three to eight sides, hexagon by default. Hinged lid with a tuck flap, locking seam, no glue.",
+  "tpl.pyramid.name": "Pyramid",
+  "tpl.pyramid.desc":
+    "Pyramid on a three to eight sided base for favours, ornaments and display. Each seam locks with a tongue and slit, no glue.",
+  "tpl.dividers.name": "Slotted Dividers",
+  "tpl.dividers.desc":
+    "Loose dividers that slot together into a grid of compartments for a drawer or box. No glue.",
+  "tpl.compartment-tray.name": "Compartment Tray",
+  "tpl.compartment-tray.desc":
+    "Locking tray plus slotted dividers that lock into a grid of compartments. No glue.",
+  "tpl.lid-and-base.name": "Lid and Base Box",
+  "tpl.lid-and-base.desc":
+    "Classic two-piece gift box: a locking tray and a lid that slips over it. Two parts, no glue.",
+  "tpl.drawer-box.name": "Drawer Box (matchbox)",
+  "tpl.drawer-box.desc":
+    "A drawer with a thumb notch that slides in a sleeve, like a matchbox. Two parts, no glue.",
+  "tpl.cylinder.name": "Cylinder Box",
+  "tpl.cylinder.desc":
+    "Round tube box: a wall that rolls into a cylinder with a locking seam, plus two discs with tabs that press-fit inside. No glue.",
+  "p.sides": "Number of sides",
+  "p.side": "Side length",
+  "p.pyramid.side": "Base side length",
+  "p.cols": "Compartments along the length",
+  "p.rows": "Compartments across the width",
+  "p.lid": "Lid depth",
+  "p.lid-and-base.height": "Base height",
+  "p.diameter": "Inside diameter",
+  "p.window": "Window cut-out in front",
+  "p.dividers.height": "Divider height",
+  "p.sleeve.height": "Sleeve length",
+  "p.polygon-box.tuck": "Lid tuck depth",
+  "p.cylinder.tab": "Disc tab depth",
+  "p.tab": "Disc tab depth",
+  "p.dividers.width": "Width (depth)",
+  "p.compartment-tray.width": "Width (front to back)",
+  "p.lid-and-base.width": "Width (front to back)",
+  "p.drawer-box.length": "Drawer length",
+  "p.drawer-box.width": "Drawer depth (slide direction)",
+  "p.drawer-box.height": "Drawer height",
+  "p.drawer-box.notch": "Thumb notch",
+  "p.sleeve.flap": "Lock flap width",
+  "p.tuck-lock-box.flap": "Lock flap width",
+  "p.snap-lock-box.flap": "Lock flap width",
+  "p.polygon-box.flap": "Lock flap width",
+  "p.pyramid.flap": "Lock flap width",
+  "p.cylinder.flap": "Lock flap width",
+  "p.drawer-box.flap": "Sleeve lock flap width",
+
+  "h.dims":
+    "Inside: the contents fit exactly. Outside: the finished box measures this.",
 } as const;
 
 export type MessageKey = keyof typeof en;

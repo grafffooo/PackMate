@@ -54,13 +54,11 @@ test("backup, wipe the database, restore", async ({ page }) => {
 
 test("a bad file is rejected with a message", async ({ page }) => {
   await page.goto("/#/settings/sync");
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "x.zip",
-      mimeType: "application/zip",
-      buffer: Buffer.from("nope"),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "x.zip",
+    mimeType: "application/zip",
+    buffer: Buffer.from("nope"),
+  });
   await expect(page.getByRole("alert")).toContainText("zip");
 });
 

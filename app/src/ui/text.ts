@@ -23,3 +23,11 @@ export const optionLabel = (
   value: string,
   fallback: string,
 ) => tr(t, `opt.${p.id}.${value}`, fallback);
+
+/** "No glue" / "Needs glue", from the template's tags. */
+export const glueTag = (t: TFn, tpl: TemplateDef) =>
+  tpl.tags.includes("no glue")
+    ? t("tag.noGlue")
+    : tpl.tags.includes("needs glue")
+      ? t("tag.needsGlue")
+      : "";

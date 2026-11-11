@@ -334,4 +334,70 @@ export const sk: Record<MessageKey, string> = {
   "restore.replace.button": "Nahradiť všetko",
   "restore.done": "Obnovené. Vaša knižnica je aktuálna.",
   "restore.failed": "Obnovenie zlyhalo: {msg}",
+
+  "cat.Sleeves & Inserts": "Návleky a vložky",
+  "cat.Shapes": "Tvary",
+  "tag.noGlue": "Bez lepenia",
+  "tag.needsGlue": "Treba lepidlo",
+  "tpl.sleeve.name": "Návlek",
+  "tpl.sleeve.desc":
+    "Návlek otvorený z oboch strán, ktorý sa nasúva na tácku, zásuvku alebo výrobok. Šev sa zamyká jazýčkom a štrbinou, bez lepenia.",
+  "tpl.tuck-lock-box.name": "Škatuľa so zámkom na šve",
+  "tpl.tuck-lock-box.desc":
+    "Škatuľa s opačným zasunutím, ktorej bočný šev sa zamyká jazýčkom a štrbinou. Lepidlo netreba.",
+  "tpl.snap-lock-box.name": "Škatuľa so zámkovým dnom",
+  "tpl.snap-lock-box.desc":
+    "Skladacia škatuľa so zámkovým dnom, zamykacím bočným švom a zasúvacím vekom. Skladá sa bez lepidla.",
+  "tpl.polygon-box.name": "Šesťhranná / mnohouholníková škatuľa",
+  "tpl.polygon-box.desc":
+    "Darčeková škatuľa na pravidelnom mnohouholníku: tri až osem strán, predvolene šesťuholník. Odklopné veko so zasúvacou chlopňou, zamykací šev, bez lepenia.",
+  "tpl.pyramid.name": "Ihlan",
+  "tpl.pyramid.desc":
+    "Ihlan s trojuholníkovou až osemuholníkovou podstavou na darčeky, ozdoby a prezentáciu. Každý šev sa zamyká jazýčkom a štrbinou, bez lepenia.",
+  "tpl.dividers.name": "Drážkované priečky",
+  "tpl.dividers.desc":
+    "Voľné priečky, ktoré sa zasunú do seba do mriežky priehradiek v zásuvke alebo škatuli. Bez lepenia.",
+  "tpl.compartment-tray.name": "Tácka s priehradkami",
+  "tpl.compartment-tray.desc":
+    "Tácka so zámkami a drážkované priečky, ktoré sa zasunú do mriežky priehradiek. Bez lepenia.",
+  "tpl.lid-and-base.name": "Škatuľa s vekom a dnom",
+  "tpl.lid-and-base.desc":
+    "Klasická dvojdielna darčeková škatuľa: tácka so zámkami a veko, ktoré sa na ňu nasúva. Dva diely, bez lepenia.",
+  "tpl.drawer-box.name": "Škatuľka so zásuvkou (zápalkovica)",
+  "tpl.drawer-box.desc":
+    "Zásuvka s výrezom na prst, ktorá sa zasúva do návleku ako zápalková škatuľka. Dva diely, bez lepenia.",
+  "tpl.cylinder.name": "Valcová škatuľa",
+  "tpl.cylinder.desc":
+    "Okrúhla škatuľa: stena, ktorá sa zvinie do valca so zamykacím švom, a dva disky s jazýčkami, ktoré sa vtlačia dovnútra. Bez lepenia.",
+  "p.sides": "Počet strán",
+  "p.side": "Dĺžka strany",
+  "p.pyramid.side": "Dĺžka strany podstavy",
+  "p.cols": "Priehradky pozdĺž dĺžky",
+  "p.rows": "Priehradky pozdĺž šírky",
+  "p.lid": "Hĺbka veka",
+  "p.lid-and-base.height": "Výška dna",
+  "p.diameter": "Vnútorný priemer",
+  "p.window": "Okienko v prednej stene",
+  "p.dividers.height": "Výška priečok",
+  "p.sleeve.height": "Dĺžka návleku",
+  "p.polygon-box.tuck": "Hĺbka zasunutia veka",
+  "p.cylinder.tab": "Hĺbka jazýčkov disku",
+  "p.tab": "Hĺbka jazýčkov disku",
+  "p.dividers.width": "Šírka (hĺbka)",
+  "p.compartment-tray.width": "Šírka (spredu dozadu)",
+  "p.lid-and-base.width": "Šírka (spredu dozadu)",
+  "p.drawer-box.length": "Dĺžka zásuvky",
+  "p.drawer-box.width": "Hĺbka zásuvky (smer zasúvania)",
+  "p.drawer-box.height": "Výška zásuvky",
+  "p.drawer-box.notch": "Výrez na prst",
+  "p.sleeve.flap": "Šírka zamykacej chlopne",
+  "p.tuck-lock-box.flap": "Šírka zamykacej chlopne",
+  "p.snap-lock-box.flap": "Šírka zamykacej chlopne",
+  "p.polygon-box.flap": "Šírka zamykacej chlopne",
+  "p.pyramid.flap": "Šírka zamykacej chlopne",
+  "p.cylinder.flap": "Šírka zamykacej chlopne",
+  "p.drawer-box.flap": "Šírka zamykacej chlopne návleku",
+
+  "h.dims":
+    "Vnútorné: obsah sa zmestí presne. Vonkajšie: hotová škatuľa má tento rozmer.",
 };
