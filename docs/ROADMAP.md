@@ -14,6 +14,8 @@ tracking issue on GitHub where you can comment.
 
 ## Milestone 4: laser-cut boxes (boxes.py)
 
+Tracking issue: [#2](https://github.com/grafffooo/PackMate/issues/2)
+
 Boxes for rigid material (wood, acrylic, MDF) with finger joints and kerf compensation, exported as
 SVG/DXF for laser cutters, alongside the paper and card boxes.
 
@@ -28,6 +30,8 @@ SVG/DXF for laser cutters, alongside the paper and card boxes.
 
 ## Milestone 5: more languages
 
+Tracking issue: [#3](https://github.com/grafffooo/PackMate/issues/3)
+
 - Make adding a language a one-file job: translation guide, parity and plural tests (already in place),
   right-to-left check.
 - First candidates: German, French, Spanish, Italian, Czech, Polish, Portuguese, Dutch. Tell us which
@@ -35,6 +39,8 @@ SVG/DXF for laser cutters, alongside the paper and card boxes.
 - Translate machine names' tips and template texts, not only the interface.
 
 ## Milestone 6: your own designs and print-and-cut PDFs
+
+Tracking issue: [#4](https://github.com/grafffooo/PackMate/issues/4)
 
 - Upload artwork (PNG, JPG, SVG, PDF) to a project.
 - Place it on the dieline: per panel or across the whole dieline, with fit, fill, offset and rotation.
@@ -44,6 +50,8 @@ SVG/DXF for laser cutters, alongside the paper and card boxes.
 - Artwork is stored with the project and included in backups and sync.
 
 ## Milestone 7: more box shapes
+
+Tracking issue: [#5](https://github.com/grafffooo/PackMate/issues/5)
 
 - Crash-lock bottom (needs a verified reference dieline).
 - Heart, cone, trapezoid and triangular prisms.

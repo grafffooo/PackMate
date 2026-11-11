@@ -245,7 +245,7 @@ library, or add your own with its measured thickness. Thicker material needs a t
 ## What's next
 
 Laser-cut boxes, more languages, your own artwork with print-and-cut PDFs, and more shapes. See the
-**[roadmap](docs/ROADMAP.md)**, and tell us what you need most by commenting on the roadmap issues.
+**[roadmap](docs/ROADMAP.md)**, and tell us what you need most by commenting on the roadmap issues ([#2 laser-cut boxes](https://github.com/grafffooo/PackMate/issues/2), [#3 languages](https://github.com/grafffooo/PackMate/issues/3), [#4 your own artwork](https://github.com/grafffooo/PackMate/issues/4), [#5 more shapes](https://github.com/grafffooo/PackMate/issues/5)).
 
 ## For developers
 
