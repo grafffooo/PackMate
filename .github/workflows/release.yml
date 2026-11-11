@@ -50,8 +50,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "PackMate $TAG" --notes-file notes.md
-          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq ".[] | select(.tag_name==\"$TAG\") | .id" | head -1)
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --method POST \
+            -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" -f name="PackMate $TAG" \
+            -F draft=true -F body=@notes.md --jq .id)
+          echo "created draft release $id"
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
   desktop:
