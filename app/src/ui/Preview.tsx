@@ -39,6 +39,11 @@ export function Preview({
   });
   const raf = useRef(0);
   const foldRef = useRef(fold);
+  // a different dieline starts folded again
+  useEffect(() => {
+    setPlaying(false);
+    setFold(1);
+  }, [resetKey]);
   foldRef.current = fold;
 
   useEffect(() => {

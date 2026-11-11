@@ -1671,6 +1671,15 @@ p {
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 900px) {
+  .preview-layer.inset,
+  .inset-chrome {
+    width: 168px;
+    height: 124px;
+    right: 12px;
+    top: 30px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
