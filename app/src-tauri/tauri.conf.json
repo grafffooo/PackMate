@@ -34,6 +34,15 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "PackMate contributors",
+    "copyright": "Copyright (c) PackMate contributors. GPL-3.0-only.",
+    "homepage": "https://github.com/grafffooo/PackMate",
+    "longDescription": "PackMate draws the flat cut-and-fold patterns (dielines) for boxes, sleeves, bags and envelopes from the size you type, folds them in 3D, and exports SVG, PDF or DXF for Brother ScanNCut, Cricut, Silhouette and cutting plotters.",
+    "linux": {
+      "deb": {
+        "section": "graphics"
+      }
+    }
   }
 }
